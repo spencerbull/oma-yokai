@@ -4,11 +4,12 @@ Goal: create `spencerbull/oma-yokai` as a bounded native Omarchy plugin without
 changing inherited Go-service or OpenTUI behavior outside the identity and
 integration work needed for the plugin.
 
-Current live-install follow-up (2026-08-22): keep stopped/exited services visible
-but neutral, reserve alerts for actual unhealthy/error states, show running and
-stopped counts in quick summaries, then rebuild/reinstall both local binaries and
-the native plugin. Desktop actions remain read-only except for cycling this
-plugin, its daemon, and loop-owned verification windows.
+Current live-install follow-up (2026-08-22): stopped/exited services remain
+visible but neutral, alerts are reserved for actual unhealthy/error states, and
+quick summaries distinguish running, transitioning, and stopped services. Both
+local binaries and the native plugin are installed from the same clean revision;
+desktop actions remain read-only except for cycling this plugin, its daemon, and
+loop-owned verification windows.
 
 ## Done criteria
 
@@ -78,8 +79,10 @@ covered by the plugin contract test instead.
 Stopped-service source evidence (2026-08-22): plugin 17/17 and OpenTUI 27/27
 tests pass; Go tests, production TUI build/compile, portable validation, native
 validation of the clean payload, isolated-cache golangci-lint, and
-`git diff --check` pass. The independent follow-up review returned GO. Live
-reinstall and visual verification remain the active checkpoint.
+`git diff --check` pass. The independent follow-up review returned GO. The clean
+installed plugin, both binary hashes, live daemon inode/version, enabled bar
+placement, resident shell reload, and live QML/OpenTUI classification all match;
+visual interaction remains gated only by the user's active screen lock.
 
 ## Streams
 
@@ -91,7 +94,7 @@ reinstall and visual verification remain the active checkpoint.
 | Tests/identity/docs/CI | same tree | done | Plugin/FleetModel tests, proven BKC image preservation, tag/manual-only release publishing, OmaYokai module/release/update/docs identity, CI gates, duplicate cleanup. |
 | Review/gates/commit | same tree | done | Independent review findings are resolved; all local source/payload, Go, plugin, shell, and TUI gates pass; this ledger is included in the scoped commit. |
 | Repository | local `main` / `spencerbull/oma-yokai` | ready to push | Public repository created; ordinary `main` pushes cannot create tags or releases. |
-| Stopped-service semantics | local `main` | source verified; live install pending | QML and OpenTUI state axes, running/transitioning/stopped summaries, neutral inactive glyph/color, mirrored tests, independent GO. |
+| Stopped-service semantics | local `main` | installed; visual check pending unlock | QML and OpenTUI agree on 2 running, 1 transitioning, 13 stopped, and 0 alerts against the live daemon; exact installed tree/binaries/daemon and CI verified. |
 
 ## Workers
 
@@ -106,7 +109,12 @@ reinstall and visual verification remain the active checkpoint.
 
 ## Human gates and residual checks
 
-- Live shell rendering and interaction are not exercised because enabling or replacing an installed plugin is forbidden in this task.
+- The session is locked, so Omarchy correctly refused a shell restart and the
+  final simple/deep panel interaction is deferred until unlock. The resident
+  shell did reload the exact plugin without OmaYokai QML errors.
+- The original rewrite task prohibited installation; this follow-up explicitly
+  allowed it. Simple and deep panels rendered during the install loop before the
+  final semantics patch, and the exact final reload has no QML errors.
 - The repository exists, but no initial release was created; `install.sh` and
   `yokai upgrade` need an explicit future release before they can download
   OmaYokai archives.
