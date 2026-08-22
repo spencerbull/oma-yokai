@@ -42,16 +42,19 @@ fleet, device, deploy, and settings work without leaving the shell.
 
 | Stream | Branch / tree | Status | Evidence |
 | --- | --- | --- | --- |
-| 0. Sync Yokai | `Yokai` `main` @ `0f170d6` | done | `main` matches `origin/main`. Worktree `finn-qwen-observability` still has unpushed `3ebe60d`. |
-| 1. Bootstrap repo + copy service/TUI | `/home/sbull/src/github.com/spencerbull/oma-yokai` | in progress | rsync of Yokai without `.git`, `bin/`, `node_modules`, `dist`, `deployments/` |
-| 2. Omarchy plugin shell (manifest, service, bar, simple panel) | same tree | pending | |
+| 0. Sync Yokai | `Yokai` `main` @ `0f170d6` | done | `git fetch --prune --tags origin`; `HEAD...origin/main` = `0 0`; source/TUI diff against this tree is empty. |
+| 1. Bootstrap repo + copy service/TUI | `main` @ `a6db5b3` | done | Inherited local draft checkpointed before edits; source copied without `.git`, `bin/`, `node_modules`, `dist`, or `deployments/`. |
+| 2. Omarchy plugin shell (manifest, service, bar, simple panel) | `complete-plugin` worktree | in progress | Current draft has manifest/service/widget but is missing `Panel.qml` and deep-view components. |
 | 3. Deep dive views (devices, services, deploy, settings, TUI launch) | same tree | pending | |
 | 4. Docs, CI, plugin validate, tests | same tree | pending | |
 | 5. Create GitHub repo and push | `spencerbull/oma-yokai` | pending | |
 
 ## Workers
 
-HERDR_ENV is unset. Orchestrator works directly in this session. No Herdr panes, tabs, or worktrees.
+| Name / kind | Location | State | Scope / evidence | Cleanup owner |
+| --- | --- | --- | --- | --- |
+| `plugin_contract` / Codex | pane `w1H:p3`, tab `w1H:t1`, workspace `w1H`; cwd `Yokai`; no branch | working | Read-only installed/official Omarchy plugin-contract research. | Orchestrator |
+| `plugin_builder` / Codex | Herdr worktree workspace, branch `complete-plugin` | pending | Complete plugin QML, tests, docs, and focused verification. | Orchestrator |
 
 ## Open questions
 
@@ -60,4 +63,6 @@ HERDR_ENV is unset. Orchestrator works directly in this session. No Herdr panes,
 
 ## Current status
 
-Implementing streams 1–4 in this tree, then push.
+Upstream and inherited source are checkpointed. Researching the current Omarchy
+4.0.0-1 contract, then finishing streams 2–4 in an isolated Herdr worktree before
+an independent review, merge, repository creation, and initial push.
