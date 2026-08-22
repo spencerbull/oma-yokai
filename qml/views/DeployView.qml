@@ -162,6 +162,7 @@ Column {
       }
     }
 
-    Timer { id: confirmReset; interval: 5000; repeat: false; onTriggered: confirmDeploy.armed = false }
   }
+
+  Timer { id: confirmReset; interval: 5000; repeat: false; onTriggered: confirmDeploy.armed = false }
 }

@@ -58,7 +58,9 @@ describe("native plugin contract", () => {
     }
     expect(read("qml/views/DevicesView.qml")).toContain("ConfirmButton")
     expect(read("qml/views/ServicesView.qml").match(/ConfirmButton/g)?.length).toBe(3)
-    expect(read("qml/views/DeployView.qml")).toContain("Confirm deploy")
+    const deployView = read("qml/views/DeployView.qml")
+    expect(deployView).toContain("Confirm deploy")
+    expect(deployView).toContain("  }\n\n  Timer { id: confirmReset;")
     expect(read("qml/views/SettingsView.qml")).not.toMatch(/settings\.hf\.(token|secret)|agent_token|ssh_password/)
   })
 
