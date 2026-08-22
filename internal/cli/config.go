@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/config"
 )
 
 // RunConfig dispatches config subcommands.

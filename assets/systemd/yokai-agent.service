@@ -1,5 +1,5 @@
 [Unit]
-Description=Yokai Agent
+Description=OmaYokai Agent
 After=network.target docker.service
 Wants=docker.service
 

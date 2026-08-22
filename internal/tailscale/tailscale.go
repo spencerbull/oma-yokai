@@ -140,7 +140,7 @@ func (p Peer) HasTag(tag string) bool {
 	return false
 }
 
-// HighlightedTags returns Yokai-recognized tags in display order.
+// HighlightedTags returns OmaYokai-recognized tags in display order.
 func (p Peer) HighlightedTags() []string {
 	if p.HasTag(AIGPUTag) {
 		return []string{"AI GPU"}
@@ -196,7 +196,7 @@ func normalizeHost(host string) string {
 
 // EnrollmentTagHelp explains how to mark AI GPU servers in Tailscale.
 func EnrollmentTagHelp() string {
-	return `Recommended Yokai tag: tag:ai-gpu
+	return `Recommended OmaYokai tag: tag:ai-gpu
 
 Define the tag in your tailnet policy:
   {

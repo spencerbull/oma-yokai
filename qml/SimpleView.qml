@@ -24,7 +24,7 @@ Column {
 
   PanelHero {
     width: parent.width
-    title: "Yokai"
+    title: "OmaYokai"
     meta: root.phase === "ready"
       ? (totals.onlineDevices + " online · " + totals.services + " services")
       : root.phase === "needs_install" ? "Service not installed"
@@ -52,7 +52,7 @@ Column {
     text: (yokai && yokai.actionError) ? yokai.actionError
       : (yokai && yokai.lastError && root.phase !== "ready") ? yokai.lastError
       : (yokai && yokai.actionStatus) ? yokai.actionStatus : ""
-    color: yokai && yokai.actionError ? root.urgent : root.dim
+    color: yokai && (yokai.actionError || (root.phase === "error" && yokai.lastError)) ? root.urgent : root.dim
     font.family: root.fontFamily
     font.pixelSize: Style.font.bodySmall
     wrapMode: Text.WordWrap
@@ -65,7 +65,7 @@ Column {
 
     Text {
       width: parent.width
-      text: "Omarchy clones plugin files only. Build the Yokai service from this plugin directory, then refresh."
+      text: "Omarchy clones plugin files only. Build the OmaYokai service from this plugin directory, then refresh."
       color: root.dim
       font.family: root.fontFamily
       font.pixelSize: Style.font.body
@@ -151,9 +151,9 @@ Column {
     spacing: Style.space(8)
 
     Button {
-      text: root.phase === "needs_install" ? "Refresh" : "Dive in"
+      text: root.phase === "needs_install" ? "Refresh" : root.phase === "error" ? "Retry" : "Dive in"
       bordered: true
-      onClicked: root.phase === "needs_install" ? root.refreshRequested() : root.diveRequested()
+      onClicked: (root.phase === "needs_install" || root.phase === "error") ? root.refreshRequested() : root.diveRequested()
     }
 
     Button {

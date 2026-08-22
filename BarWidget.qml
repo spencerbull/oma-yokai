@@ -14,6 +14,7 @@ BarWidget {
   readonly property bool alarming: Fleet.phaseUrgent(phase, snapshot)
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
+  readonly property real openPanelIndicatorWidth: button.labelWidth
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
@@ -73,11 +74,15 @@ BarWidget {
     }
   }
 
-  BarIconButton {
+  WidgetButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.alarming ? "󰀦" : "󰢮"
+    text: root.vertical
+      ? (root.alarming ? "󰀦" : "󰢮")
+      : (root.alarming ? "󰀦 " : "󰢮 ") + Fleet.barLabel(root.snapshot, root.phase)
+    fontSize: Style.font.bodySmall
+    horizontalMargin: 7
     active: root.opened || root.alarming
     tooltipText: Fleet.barTooltip(root.snapshot, root.phase, yokai ? yokai.lastError : "")
     onPressed: function(buttonCode) {

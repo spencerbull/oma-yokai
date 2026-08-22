@@ -1,4 +1,4 @@
-module github.com/spencerbull/yokai
+module github.com/spencerbull/oma-yokai
 
 go 1.25.5
 

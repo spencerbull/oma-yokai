@@ -14,7 +14,7 @@ const (
 	// NPMPackage is the AI SDK package for OpenAI-compatible providers.
 	NPMPackage = "@ai-sdk/openai-compatible"
 	// ProviderDisplayName is the display name shown in OpenCode's UI.
-	ProviderDisplayName = "Yokai"
+	ProviderDisplayName = "OmaYokai"
 )
 
 // Endpoint represents an OpenAI-compatible model endpoint for OpenCode.

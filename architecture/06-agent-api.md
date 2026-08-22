@@ -176,7 +176,7 @@ scrape_configs:
 ```
 
 ```
-# HELP yokai_service_up Whether Yokai can scrape service-level metrics
+# HELP yokai_service_up Whether OmaYokai can scrape service-level metrics
 # TYPE yokai_service_up gauge
 yokai_service_up{service="vllm-llama31-8b",backend="vllm",model="meta-llama/Llama-3.1-8B-Instruct"} 1
 

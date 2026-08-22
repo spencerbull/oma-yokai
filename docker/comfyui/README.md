@@ -1,4 +1,4 @@
-# Yokai ComfyUI Docker Image
+# OmaYokai ComfyUI Docker Image
 
 Multi-architecture (amd64/arm64) Docker image for [ComfyUI](https://github.com/comfyanonymous/ComfyUI) with CUDA support and [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager) pre-installed.
 

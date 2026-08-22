@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/docker"
+	"github.com/spencerbull/oma-yokai/internal/docker"
 )
 
 var startTime = time.Now()

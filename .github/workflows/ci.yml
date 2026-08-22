@@ -7,6 +7,18 @@ on:
     branches: [main]
 
 jobs:
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Validate portable plugin contract
+        run: ./scripts/validate-plugin .
+      - name: Test FleetModel and plugin scripts
+        run: bun test tests/plugin
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -88,14 +100,14 @@ jobs:
           test "$archive_count" -eq 5
 
           for platform in darwin_amd64 darwin_arm64 linux_amd64 linux_arm64; do
-            archive=$(find dist -maxdepth 1 -type f -name "Yokai_*_${platform}.tar.gz" -print -quit)
+            archive=$(find dist -maxdepth 1 -type f -name "OmaYokai_*_${platform}.tar.gz" -print -quit)
             test -n "$archive"
             archive_contents=$(tar -tzf "$archive")
             grep -qx 'yokai' <<< "$archive_contents"
             grep -qx 'yokai-tui' <<< "$archive_contents"
           done
 
-          windows_archive=$(find dist -maxdepth 1 -type f -name 'Yokai_*_windows_amd64.zip' -print -quit)
+          windows_archive=$(find dist -maxdepth 1 -type f -name 'OmaYokai_*_windows_amd64.zip' -print -quit)
           test -n "$windows_archive"
           windows_contents=$(unzip -Z1 "$windows_archive")
           grep -qx 'yokai.exe' <<< "$windows_contents"

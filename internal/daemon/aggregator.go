@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/docker"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/docker"
 )
 
 // Aggregator polls agents for metrics and forwards commands

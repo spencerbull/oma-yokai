@@ -1,13 +1,13 @@
-# yokai
+# OmaYokai
 
-[![CI](https://github.com/spencerbull/yokai/actions/workflows/ci.yml/badge.svg)](https://github.com/spencerbull/yokai/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/spencerbull/yokai)](https://goreportcard.com/report/github.com/spencerbull/yokai)
-[![Latest Release](https://img.shields.io/github/v/release/spencerbull/yokai)](https://github.com/spencerbull/yokai/releases/latest)
+[![CI](https://github.com/spencerbull/oma-yokai/actions/workflows/ci.yml/badge.svg)](https://github.com/spencerbull/oma-yokai/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/spencerbull/oma-yokai)](https://goreportcard.com/report/github.com/spencerbull/oma-yokai)
+[![Latest Release](https://img.shields.io/github/v/release/spencerbull/oma-yokai)](https://github.com/spencerbull/oma-yokai/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**One binary to deploy, monitor, and manage LLM inference across all your GPUs.**
+**A native Omarchy fleet glance backed by the full terminal workflow for deploying, monitoring, and managing local AI services.**
 
-yokai is a terminal-based fleet manager for running **vLLM**, **llama.cpp**, and **ComfyUI** on any number of GPU machines. Connect your devices, deploy curated Best-Known-Configs (or roll your own through a guided wizard), and watch everything on a btop-style dashboard -- all from a single binary with zero dependencies on the target machines.
+OmaYokai combines a native Omarchy bar widget and panel with the existing Go daemon/agent and OpenTUI workflow. The installed command intentionally remains `yokai`: the shell panel is the quick operational surface, while Open TUI retains the complete device, deployment, logs, tuning, and credential flows.
 
 ```
  ┌───────────┐ ╔══════════════════╗ ┌──────────────┐ ┌─────────────┐ ┌───────────────┐
@@ -41,7 +41,7 @@ yokai is a terminal-based fleet manager for running **vLLM**, **llama.cpp**, and
 
 ---
 
-## Why yokai?
+## Why OmaYokai?
 
 If you're running local LLMs across multiple machines, you already know the pain:
 
@@ -50,7 +50,7 @@ If you're running local LLMs across multiple machines, you already know the pain
 - **Juggle separate monitoring dashboards** for each machine
 - **Manually edit tool configs** every time an endpoint changes
 
-yokai solves all of this with a single binary. Install it, point it at your machines, and you're running models in minutes -- not hours.
+OmaYokai solves all of this with a single binary. Install it, point it at your machines, and you're running models in minutes -- not hours.
 
 ---
 
@@ -58,7 +58,7 @@ yokai solves all of this with a single binary. Install it, point it at your mach
 
 ### Fleet Management
 - **Onboarding wizard** -- connect devices via LAN scan, Tailscale peer discovery, or manual IP entry
-- **GPU-aware Tailscale discovery** -- surface peer tags and highlight dedicated compute nodes carrying Yokai's recommended `tag:ai-gpu` identity
+- **GPU-aware Tailscale discovery** -- surface peer tags and highlight dedicated compute nodes carrying OmaYokai's recommended `tag:ai-gpu` identity
 - **SSH bootstrap** -- pre-flight checks (Docker, GPU, disk space), agent deployment, and systemd service installation in one step
 - **Device manager** -- add, edit, remove, and test connectivity for all devices from the TUI
 - **Secure by default** -- auto-generated bearer tokens for agent authentication, SSH key resolution with agent/key/password fallback
@@ -102,23 +102,43 @@ yokai solves all of this with a single binary. Install it, point it at your mach
 
 ## Quick Start
 
+### Omarchy plugin
+
+OmaYokai targets Omarchy 4.0.0-1's native `schemaVersion: 1` third-party plugin contract. Installation is intentionally two explicit steps because `omarchy plugin add` only clones, validates, and enables plugin files; it does not run repository build hooks or privileged commands.
+
+```bash
+git clone https://github.com/spencerbull/oma-yokai.git
+cd oma-yokai
+make install                         # builds yokai + yokai-tui into ~/.local/bin
+omarchy plugin add https://github.com/spencerbull/oma-yokai.git --enable
+```
+
+The bar shows fleet health, GPU utilization, and alerts. Left click opens the default glance; **Dive in** opens bounded overview, devices, services, deploy, and settings views. Right click or **Open TUI** launches the full workflow. Destructive panel actions require a second confirmation, and credential values are never rendered in QML.
+
+For a source checkout, validate the portable plugin contract without installing it:
+
+```bash
+./scripts/validate-plugin .
+bun test tests/plugin
+```
+
 ### Install
 
 **One-line installer** (Linux/macOS):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/spencerbull/Yokai/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/spencerbull/oma-yokai/main/install.sh | sh
 ```
 
 **From GitHub Releases:**
 
-Download the latest binary for your platform from the [Releases page](https://github.com/spencerbull/yokai/releases/latest), extract it, and move it to your PATH.
+Download the latest binary for your platform from the [Releases page](https://github.com/spencerbull/oma-yokai/releases/latest), extract it, and move it to your PATH.
 
 **Build from source:**
 
 ```bash
-git clone https://github.com/spencerbull/yokai.git
-cd yokai
+git clone https://github.com/spencerbull/oma-yokai.git
+cd oma-yokai
 make build
 ./bin/yokai
 ```
@@ -138,7 +158,7 @@ yokai
 
 ### Tag GPU compute nodes in Tailscale
 
-Yokai can import online peers from `tailscale status --json`. Dedicated GPU servers tagged with `tag:ai-gpu` receive an **AI GPU** badge and are easier to identify in the device picker. The tag is recommended, not required.
+OmaYokai can import online peers from `tailscale status --json`. Dedicated GPU servers tagged with `tag:ai-gpu` receive an **AI GPU** badge and are easier to identify in the device picker. The tag is recommended, not required.
 
 Define `tag:ai-gpu` and its owner in your tailnet policy, then apply it from **Tailscale Admin Console -> Machines -> device -> Edit tags** or authenticate the dedicated server with the tag:
 
@@ -147,7 +167,7 @@ sudo tailscale login --advertise-tags=tag:ai-gpu
 sudo tailscale up --advertise-tags=tag:ai-gpu --force-reauth
 ```
 
-Only tag dedicated, non-human server nodes: Tailscale tags replace user-based device identity and do not grant network or SSH access. See the [full Tailscale GPU-node guide](https://spencerbull.github.io/yokai-docs/guides/tailscale-gpu-nodes/) for `tagOwners`, access-policy examples, Yokai verification, and troubleshooting.
+Only tag dedicated, non-human server nodes: Tailscale tags replace user-based device identity and do not grant network or SSH access. See the [network and authentication guide](architecture/04-network-topology.md) for the trust boundaries and access model.
 
 ### Running the Daemon
 
@@ -235,7 +255,7 @@ All non-TUI commands emit JSON on stdout and JSON-formatted errors on stderr, so
 
 ## How It Works
 
-yokai uses a three-tier architecture: **OpenTUI** (what you see, a TypeScript app rendered in your terminal), the **Daemon** (runs locally and brokers everything), and the **Agent** (runs on each GPU device).
+OmaYokai uses a three-tier architecture: **OpenTUI** (what you see, a TypeScript app rendered in your terminal), the **Daemon** (runs locally and brokers everything), and the **Agent** (runs on each GPU device).
 
 ```
 Your Machine                              GPU Device(s)
@@ -425,7 +445,7 @@ Detailed multi-level architecture docs are available in the [`architecture/`](ar
 ## Project Structure
 
 ```
-yokai/
+oma-yokai/
 ├── cmd/yokai/             # Binary entry point and subcommand dispatch
 ├── internal/
 │   ├── agent/             # Remote agent: REST API, Docker ops, system metrics (port :7474)

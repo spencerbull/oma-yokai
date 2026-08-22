@@ -9,8 +9,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/spencerbull/yokai/internal/config"
-	sshpkg "github.com/spencerbull/yokai/internal/ssh"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	sshpkg "github.com/spencerbull/oma-yokai/internal/ssh"
 )
 
 // RunDevices dispatches devices subcommands.

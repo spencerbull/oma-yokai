@@ -16,8 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/plugins"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/plugins"
 )
 
 // VLLMMetrics holds vLLM inference throughput metrics.

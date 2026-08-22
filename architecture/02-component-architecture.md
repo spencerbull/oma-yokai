@@ -1,6 +1,6 @@
 # L2: Component Architecture
 
-Current Yokai component structure, centered on a Go daemon backend and a single OpenTUI frontend.
+Current OmaYokai component structure, centered on a Go daemon backend and a single OpenTUI frontend.
 
 ## Package Dependency Graph
 

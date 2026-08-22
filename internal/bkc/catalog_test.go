@@ -32,6 +32,11 @@ func TestLookupFindsNemotronSuperVLLM(t *testing.T) {
 func TestLookupFindsNemotronNanoOmniNVFP4(t *testing.T) {
 	t.Parallel()
 
+	const provenAudioImage = "ghcr.io/spencerbull/yokai/vllm-openai-audio:v0.20.0"
+	if imageVLLM020Audio != provenAudioImage {
+		t.Fatalf("audio BKC must preserve the published image %q, got %q", provenAudioImage, imageVLLM020Audio)
+	}
+
 	cfg, ok := Lookup(WorkloadVLLM, "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-NVFP4")
 	if !ok {
 		t.Fatal("expected matching BKC")

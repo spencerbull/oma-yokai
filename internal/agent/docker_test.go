@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/spencerbull/yokai/internal/plugins"
+	"github.com/spencerbull/oma-yokai/internal/plugins"
 )
 
 func TestSanitizeName(t *testing.T) {

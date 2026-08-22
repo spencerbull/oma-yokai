@@ -32,7 +32,7 @@ export function OnboardingRoute(props: OnboardingRouteProps) {
           <strong>Add your first GPU device</strong>
         </text>
         <text fg={theme.colors.textMuted}>
-          Yokai will connect to the device, run preflight checks, deploy the Yokai agent, and then bring the host into the dashboard automatically.
+          OmaYokai will connect to the device, run preflight checks, deploy the OmaYokai agent, and then bring the host into the dashboard automatically.
         </text>
         <text fg={theme.colors.textSubtle}>
           Press <span fg={theme.colors.textMuted}>Enter</span> or <span fg={theme.colors.textMuted}>A</span> to choose a connection source.
@@ -75,7 +75,7 @@ export function OnboardingRoute(props: OnboardingRouteProps) {
         </text>
         <text fg={theme.colors.textSubtle}>1. Choose Manual, SSH Config, or Tailscale.</text>
         <text fg={theme.colors.textSubtle}>2. Review SSH credentials and connection details.</text>
-        <text fg={theme.colors.textSubtle}>3. Yokai bootstraps the remote agent and adds the device automatically.</text>
+        <text fg={theme.colors.textSubtle}>3. OmaYokai bootstraps the remote agent and adds the device automatically.</text>
       </box>
 
       <DeviceSetupOverlays controller={props.controller} />

@@ -7,13 +7,42 @@ STATE_HOME="${XDG_STATE_HOME:-${HOME}/.local/state}"
 LOG_DIR="${STATE_HOME}/yokai"
 LOG="${LOG_DIR}/daemon.log"
 
+case "$BINARY" in
+  /*) ;;
+  *) printf 'yokai binary path must be absolute\n' >&2; exit 64 ;;
+esac
+[ -x "$BINARY" ] || { printf 'yokai binary is not executable: %s\n' "$BINARY" >&2; exit 69; }
+
+HOST_PART="${ADDR%:*}"
+PORT_PART="${ADDR##*:}"
+case "$HOST_PART" in localhost|127.0.0.1|'[::1]') ;; *) printf 'daemon address must be loopback host:port\n' >&2; exit 64 ;; esac
+case "$PORT_PART" in ''|*[!0-9]*) printf 'daemon port must be numeric\n' >&2; exit 64 ;; esac
+[ "$PORT_PART" -ge 1 ] && [ "$PORT_PART" -le 65535 ] || { printf 'daemon port is out of range\n' >&2; exit 64; }
+
 mkdir -p "$LOG_DIR"
 
-if curl -fsS --max-time 1 "http://${ADDR}/health" >/dev/null 2>&1; then
+if curl --fail --silent --show-error --max-time 1 --url "http://${ADDR}/health" >/dev/null 2>&1; then
   printf '%s\n' '{"started":false,"healthy":true}'
   exit 0
 fi
 
 nohup "$BINARY" daemon >>"$LOG" 2>&1 &
 PID=$!
-printf '%s\n' "{\"started\":true,\"pid\":${PID},\"log\":\"${LOG}\"}"
+
+attempt=0
+while [ "$attempt" -lt 20 ]; do
+  if curl --fail --silent --show-error --max-time 1 --url "http://${ADDR}/health" >/dev/null 2>&1; then
+    printf '%s\n' "{\"started\":true,\"healthy\":true,\"pid\":${PID}}"
+    exit 0
+  fi
+  if ! kill -0 "$PID" 2>/dev/null; then
+    wait "$PID" 2>/dev/null || true
+    printf 'yokai daemon exited before becoming healthy; log: %s\n' "$LOG" >&2
+    exit 70
+  fi
+  attempt=$((attempt + 1))
+  sleep 0.1
+done
+
+printf 'yokai daemon did not become healthy; log: %s\n' "$LOG" >&2
+exit 70

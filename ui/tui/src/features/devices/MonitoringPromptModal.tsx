@@ -27,7 +27,7 @@ export function MonitoringPromptModal() {
           <strong>Deploy monitoring stack?</strong>
         </text>
         <text fg={theme.colors.textMuted}>
-          Yokai can also install Prometheus, Grafana, and Node Exporter during bootstrap.
+          OmaYokai can also install Prometheus, Grafana, and Node Exporter during bootstrap.
         </text>
         <text fg={theme.colors.textSubtle}>
           If the target has NVIDIA GPUs, GPU monitoring will be included too.

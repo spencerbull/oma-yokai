@@ -32,7 +32,7 @@ export function SettingsRoute(props: SettingsRouteProps) {
               />
               <ThemeChoice
                 active={theme.preference === "dark"}
-                description="Use Yokai's built-in dark theme"
+                description="Use OmaYokai's built-in dark theme"
                 keys="D"
                 label="Dark"
                 onSelect={() => theme.setPreference("dark")}

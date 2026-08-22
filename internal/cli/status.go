@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/spencerbull/yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/config"
 )
 
 // RunStatus outputs fleet overview.

@@ -1,6 +1,6 @@
 package daemon
 
-import "github.com/spencerbull/yokai/internal/config"
+import "github.com/spencerbull/oma-yokai/internal/config"
 
 // DeployRequest represents a request to deploy a container to a device
 type DeployRequest struct {

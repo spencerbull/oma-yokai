@@ -11,10 +11,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/docker"
-	"github.com/spencerbull/yokai/internal/monitoring"
-	sshpkg "github.com/spencerbull/yokai/internal/ssh"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/docker"
+	"github.com/spencerbull/oma-yokai/internal/monitoring"
+	sshpkg "github.com/spencerbull/oma-yokai/internal/ssh"
 )
 
 type bootstrapDeviceRequest struct {
@@ -128,7 +128,7 @@ func (d *Daemon) handleBootstrapDevice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d.applyConfigUpdate(nextCfg)
-	message := fmt.Sprintf("Bootstrapped %s and deployed the Yokai agent", device.Label)
+	message := fmt.Sprintf("Bootstrapped %s and deployed the OmaYokai agent", device.Label)
 	if monitoringInstalled {
 		message += " plus monitoring"
 	} else if monitoringErr != nil {
