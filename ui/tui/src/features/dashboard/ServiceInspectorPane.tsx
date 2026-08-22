@@ -1,5 +1,6 @@
 import type { FleetSnapshot, FleetService } from "../../contracts/fleet"
 import { useTheme } from "../../theme/context"
+import { formatServiceSummary, serviceDisplayState } from "./normalizeFleet"
 
 type ServiceInspectorPaneProps = {
   pendingAction?: string | null
@@ -28,7 +29,7 @@ export function ServiceInspectorPane(props: ServiceInspectorPaneProps) {
         <>
           <text fg={theme.colors.text}><strong>{props.service.name}</strong></text>
           <text fg={theme.colors.textMuted}>{props.service.deviceLabel} · {props.service.type}</text>
-          <MetricLine label="State" value={props.service.health || props.service.status || "running"} />
+          <MetricLine label="State" value={serviceDisplayState(props.service)} />
           <MetricLine label="Image" value={props.service.image || "unknown"} />
           <MetricLine label="Port" value={props.service.port > 0 ? `${props.service.port}` : "-"} />
           <MetricLine label="CPU" value={`${props.service.cpuPercent.toFixed(1)}%`} />
@@ -47,7 +48,7 @@ export function ServiceInspectorPane(props: ServiceInspectorPaneProps) {
       )}
 
       <text fg={theme.colors.textSubtle}>
-        Fleet: {props.snapshot.totals.onlineDevices}/{props.snapshot.totals.devices} devices online · {props.snapshot.totals.services} services · {props.snapshot.totals.alertServices} alerts
+        Fleet: {props.snapshot.totals.onlineDevices}/{props.snapshot.totals.devices} devices online · {formatServiceSummary(props.snapshot.totals)}
       </text>
     </box>
   )

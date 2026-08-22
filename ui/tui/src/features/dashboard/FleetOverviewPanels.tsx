@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 
 import type { FleetHistory, FleetSnapshot } from "../../contracts/fleet"
 import { MetricViz } from "./UtilizationViz"
+import { formatServiceSummary } from "./normalizeFleet"
 import { useTheme } from "../../theme/context"
 
 type FleetOverviewPanelsProps = {
@@ -35,7 +36,7 @@ export function FleetOverviewPanels(props: FleetOverviewPanelsProps) {
             <MetricViz compact detail={memoryDetail(props.snapshot.totals.ramUsedMB, props.snapshot.totals.ramTotalMB)} height={3} history={props.history.fleet.ram} label="RAM" value={props.snapshot.totals.avgRamPercent} width={wideVizWidth} />
           </box>
           <OverviewLine label="Nodes" value={`${props.snapshot.totals.onlineDevices} online · ${Math.max(0, props.snapshot.totals.devices - props.snapshot.totals.onlineDevices)} offline`} />
-          <OverviewLine label="Svc" value={`${props.snapshot.totals.services} total · ${props.snapshot.totals.alertServices} alert(s)`} />
+          <OverviewLine label="Svc" value={formatServiceSummary(props.snapshot.totals)} />
         </FleetPanel>
       </box>
     )
@@ -52,7 +53,7 @@ export function FleetOverviewPanels(props: FleetOverviewPanelsProps) {
         <MetricViz history={props.history.fleet.cpu} label="CPU" value={props.snapshot.totals.avgCpuPercent} width={stackedVizWidth} />
         <MetricViz detail={memoryDetail(props.snapshot.totals.ramUsedMB, props.snapshot.totals.ramTotalMB)} history={props.history.fleet.ram} label="RAM" value={props.snapshot.totals.avgRamPercent} width={stackedVizWidth} />
         <OverviewLine label="Nodes" value={`${props.snapshot.totals.onlineDevices} online · ${Math.max(0, props.snapshot.totals.devices - props.snapshot.totals.onlineDevices)} offline`} />
-        <OverviewLine label="Svc" value={`${props.snapshot.totals.services} total · ${props.snapshot.totals.alertServices} alert(s)`} />
+        <OverviewLine label="Svc" value={formatServiceSummary(props.snapshot.totals)} />
       </FleetPanel>
     </box>
   )

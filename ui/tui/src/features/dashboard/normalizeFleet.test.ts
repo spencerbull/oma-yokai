@@ -1,7 +1,16 @@
 import { describe, expect, test } from "bun:test"
 
 import type { DeviceRecord, MetricsResponse } from "../../contracts/fleet"
-import { normalizeFleetSnapshot } from "./normalizeFleet"
+import {
+  formatServiceSummary,
+  isAlertService,
+  isRunningService,
+  isStoppedService,
+  isTransitioningService,
+  isUnknownService,
+  normalizeFleetSnapshot,
+  serviceDisplayState,
+} from "./normalizeFleet"
 
 describe("normalizeFleetSnapshot", () => {
   test("sorts alerting services first and enriches device labels", () => {
@@ -58,7 +67,13 @@ describe("normalizeFleetSnapshot", () => {
           {
             id: "container-alert",
             name: "yokai-alert",
-            status: "exited",
+            status: "running",
+            health: "unhealthy",
+          },
+          {
+            id: "container-stopped",
+            name: "yokai-stopped",
+            status: "stopped",
           },
         ],
       },
@@ -68,7 +83,11 @@ describe("normalizeFleetSnapshot", () => {
 
     expect(snapshot.totals.devices).toBe(2)
     expect(snapshot.totals.onlineDevices).toBe(2)
-    expect(snapshot.totals.services).toBe(2)
+    expect(snapshot.totals.services).toBe(3)
+    expect(snapshot.totals.runningServices).toBe(2)
+    expect(snapshot.totals.transitioningServices).toBe(0)
+    expect(snapshot.totals.stoppedServices).toBe(1)
+    expect(snapshot.totals.unknownServices).toBe(0)
     expect(snapshot.totals.alertServices).toBe(1)
     expect(snapshot.totals.avgCpuPercent).toBe(16)
     expect(snapshot.totals.avgRamPercent).toBe(18.75)
@@ -79,6 +98,23 @@ describe("normalizeFleetSnapshot", () => {
     expect(snapshot.services[1].promptTokensTotal).toBe(1200)
     expect(snapshot.services[1].generationTokensTotal).toBe(900)
     expect(snapshot.services[1].cachedPromptTokensTotal).toBe(300)
+  })
+
+  test("shows intentionally stopped services without treating them as alerts", () => {
+    const stopped = { status: "stopped", health: "unhealthy" }
+    expect(isStoppedService(stopped)).toBe(true)
+    expect(isStoppedService({ status: "exited" })).toBe(true)
+    expect(isRunningService(stopped)).toBe(false)
+    expect(isAlertService(stopped)).toBe(false)
+    expect(serviceDisplayState(stopped)).toBe("stopped")
+    expect(isAlertService({ status: "running", health: "unhealthy" })).toBe(true)
+    expect(isRunningService({ status: "running", health: "unhealthy" })).toBe(true)
+    expect(isTransitioningService({ status: "restarting" })).toBe(true)
+    expect(isAlertService({ status: "failed", health: "starting" })).toBe(true)
+    expect(serviceDisplayState({ status: "failed", health: "starting" })).toBe("failed")
+    expect(isUnknownService({ status: "unknown" })).toBe(true)
+    expect(isAlertService({ status: "unknown" })).toBe(false)
+    expect(formatServiceSummary({ runningServices: 2, transitioningServices: 1, stoppedServices: 2, unknownServices: 0, alertServices: 0 })).toBe("2 running · 1 transitioning · 2 stopped")
   })
 
   test("computes gpu totals and per-device gpu summary", () => {

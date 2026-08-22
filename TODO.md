@@ -4,6 +4,12 @@ Goal: create `spencerbull/oma-yokai` as a bounded native Omarchy plugin without
 changing inherited Go-service or OpenTUI behavior outside the identity and
 integration work needed for the plugin.
 
+Current live-install follow-up (2026-08-22): keep stopped/exited services visible
+but neutral, reserve alerts for actual unhealthy/error states, show running and
+stopped counts in quick summaries, then rebuild/reinstall both local binaries and
+the native plugin. Desktop actions remain read-only except for cycling this
+plugin, its daemon, and loop-owned verification windows.
+
 ## Done criteria
 
 - [x] Root `schemaVersion: 1` manifest exposes only native `bar-widget` and `service` entry points.
@@ -69,6 +75,12 @@ The available `actionlint` command is only an unconfigured mise shim and could
 not run without installing a new tool version. Release-trigger behavior is
 covered by the plugin contract test instead.
 
+Stopped-service source evidence (2026-08-22): plugin 17/17 and OpenTUI 27/27
+tests pass; Go tests, production TUI build/compile, portable validation, native
+validation of the clean payload, isolated-cache golangci-lint, and
+`git diff --check` pass. The independent follow-up review returned GO. Live
+reinstall and visual verification remain the active checkpoint.
+
 ## Streams
 
 | Stream | Branch / tree | Status | Evidence |
@@ -79,6 +91,7 @@ covered by the plugin contract test instead.
 | Tests/identity/docs/CI | same tree | done | Plugin/FleetModel tests, proven BKC image preservation, tag/manual-only release publishing, OmaYokai module/release/update/docs identity, CI gates, duplicate cleanup. |
 | Review/gates/commit | same tree | done | Independent review findings are resolved; all local source/payload, Go, plugin, shell, and TUI gates pass; this ledger is included in the scoped commit. |
 | Repository | local `main` / `spencerbull/oma-yokai` | ready to push | Public repository created; ordinary `main` pushes cannot create tags or releases. |
+| Stopped-service semantics | local `main` | source verified; live install pending | QML and OpenTUI state axes, running/transitioning/stopped summaries, neutral inactive glyph/color, mirrored tests, independent GO. |
 
 ## Workers
 
@@ -89,6 +102,7 @@ covered by the plugin contract test instead.
 | `plugin_builder` / Codex | pane `w1N:p1`, workspace `w1N`; `complete-plugin` | done, commit `c40ae8c` | Implemented the scoped plugin rewrite and returned clean post-commit validation evidence. | Orchestrator after merge/push |
 | `oma_repo_audit` / Codex | pane `w1N:p2`, tab `w1N:t1`, workspace `w1N`; this worktree/branch | done, pane closed | Final review found the unproven BKC image rename, secret-capable argv bodies, and one-shot daemon recovery. All three were fixed and covered by focused tests. | Orchestrator, complete |
 | `oma_contract_audit` / Codex | pane `w1N:p3`, tab `w1N:t1`, workspace `w1N`; this worktree/branch | done, pane closed | Confirmed Omarchy 4.0.0-1 root-v1 manifest, long-lived unsandboxed QML, native panel/key patterns, clone/validate/enable lifecycle, and missing contract tests. | Orchestrator, complete |
+| `yokai-stopped-review` / Codex | pane `w1M:p1`, workspace `w1M`; read-only on local `main` | done, GO | Found stale stopped-health display and running/transition drift; verified the corrected final diff with no unresolved actionable issue. | Orchestrator after report |
 
 ## Human gates and residual checks
 

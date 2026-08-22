@@ -20,7 +20,7 @@ Column {
     width: parent.width
     title: "Fleet overview"
     meta: totals.onlineDevices + "/" + totals.devices + " devices online"
-    detail: totals.services + " services · " + totals.alertServices + " alerts"
+    detail: Fleet.serviceSummary(totals)
     foreground: root.foreground
     fontFamily: root.fontFamily
   }

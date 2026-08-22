@@ -6,6 +6,7 @@ import { LogsPane } from "../logs/LogsPane"
 import { ServiceInspectorPane } from "./ServiceInspectorPane"
 import { useTheme } from "../../theme/context"
 import type { DashboardController } from "./useDashboardController"
+import { serviceDisplayState } from "./normalizeFleet"
 
 type ServiceDetailRouteProps = {
   contentHeight: number
@@ -44,7 +45,7 @@ export function ServiceDetailRoute(props: ServiceDetailRouteProps) {
           <box flexDirection={wide ? "row" : "column"} justifyContent="space-between" gap={1}>
             <box flexDirection="column" gap={0}>
               <text fg={theme.colors.text}><strong>{service.name}</strong></text>
-              <text fg={theme.colors.textMuted}>{service.deviceLabel} · {service.type} · {service.health || service.status || "running"}{positionLabel ? ` · ${positionLabel}` : ""}</text>
+              <text fg={theme.colors.textMuted}>{service.deviceLabel} · {service.type} · {serviceDisplayState(service)}{positionLabel ? ` · ${positionLabel}` : ""}</text>
             </box>
             <text fg={theme.colors.textSubtle}>Esc back to dashboard</text>
           </box>

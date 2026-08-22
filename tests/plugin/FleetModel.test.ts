@@ -10,9 +10,19 @@ function loadFleetModel(): FleetModule {
   const names = [
     "emptySettings",
     "emptySnapshot",
+    "barLabel",
     "formatMemory",
+    "isAlertService",
+    "isRunningService",
+    "isStoppedService",
+    "isTransitioningService",
+    "isUnknownService",
     "normalizePayload",
     "phaseUrgent",
+    "serviceDisplayState",
+    "serviceGlyph",
+    "serviceState",
+    "serviceSummary",
   ]
   return new Function(`${source}\nreturn { ${names.join(", ")} }`)() as FleetModule
 }
@@ -31,7 +41,8 @@ function fixture(devices: any[]) {
         gpus: [{ name: "Arc B390", utilization_percent: 60, vram_used_mb: 8192, vram_total_mb: 24576 }],
         containers: [
           { id: "c-2", name: "yokai-vllm-zeta", status: "running", ports: { "9000": "9000", "8000": "8000" } },
-          { id: "c-1", name: "yokai-vllm-alpha", status: "exited" },
+          { id: "c-1", name: "yokai-vllm-alpha", status: "stopped" },
+          { id: "c-3", name: "yokai-vllm-broken", status: "running", health: "unhealthy" },
         ],
       },
       "node-a": {
@@ -60,9 +71,9 @@ describe("FleetModel", () => {
 
     expect(first).toEqual(second)
     expect(first.devices.map((device: any) => device.id)).toEqual(["node-a", "node-b"])
-    expect(first.services.map((service: any) => service.name)).toEqual(["vllm-alpha", "prometheus", "vllm-zeta"])
+    expect(first.services.map((service: any) => service.name)).toEqual(["vllm-broken", "prometheus", "vllm-zeta", "vllm-alpha"])
     expect(first.services[2].port).toBe(8000)
-    expect(first.totals).toMatchObject({ devices: 2, onlineDevices: 2, services: 3, alertServices: 1, gpuCount: 2 })
+    expect(first.totals).toMatchObject({ devices: 2, onlineDevices: 2, services: 4, runningServices: 3, transitioningServices: 0, stoppedServices: 1, unknownServices: 0, alertServices: 1, gpuCount: 2 })
     expect(first.updatedAt).toBe("2026-08-22T12:00:02Z")
   })
 
@@ -87,5 +98,27 @@ describe("FleetModel", () => {
     expect(Fleet.emptySnapshot()).toMatchObject({ devices: [], services: [], updatedAt: "" })
     expect(Fleet.formatMemory(1536)).toBe("1.5 GB")
     expect(Fleet.phaseUrgent("error", Fleet.emptySnapshot())).toBe(true)
+    expect(Fleet.isStoppedService({ status: "stopped", health: "unhealthy" })).toBe(true)
+    expect(Fleet.isStoppedService({ status: "exited" })).toBe(true)
+    expect(Fleet.isAlertService({ status: "stopped", health: "unhealthy" })).toBe(false)
+    expect(Fleet.isRunningService({ status: "stopped" })).toBe(false)
+    expect(Fleet.serviceDisplayState({ status: "stopped", health: "unhealthy" })).toBe("stopped")
+    expect(Fleet.serviceGlyph({ status: "stopped" })).toBe("○")
+    expect(Fleet.isAlertService({ status: "running", health: "unhealthy" })).toBe(true)
+    expect(Fleet.isRunningService({ status: "running", health: "unhealthy" })).toBe(true)
+    expect(Fleet.isTransitioningService({ status: "restarting" })).toBe(true)
+    expect(Fleet.isAlertService({ status: "failed", health: "starting" })).toBe(true)
+    expect(Fleet.serviceDisplayState({ status: "failed", health: "starting" })).toBe("failed")
+    expect(Fleet.isUnknownService({ status: "unknown" })).toBe(true)
+    expect(Fleet.isAlertService({ status: "unknown" })).toBe(false)
+    expect(Fleet.serviceSummary({ runningServices: 2, transitioningServices: 1, stoppedServices: 2, unknownServices: 0, alertServices: 0 })).toBe("2 running · 1 transitioning · 2 stopped")
+
+    const stoppedOnly = Fleet.normalizePayload({
+      devices: { devices: [{ id: "node", label: "node", online: true }] },
+      metrics: { node: { online: true, containers: [{ id: "stopped", name: "yokai-stopped", status: "stopped" }] } },
+    })
+    expect(stoppedOnly.totals).toMatchObject({ runningServices: 0, stoppedServices: 1, alertServices: 0 })
+    expect(Fleet.phaseUrgent("ready", stoppedOnly)).toBe(false)
+    expect(Fleet.barLabel(stoppedOnly, "ready")).not.toContain("⚠")
   })
 })

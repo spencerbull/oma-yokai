@@ -5,6 +5,10 @@ function emptyTotals() {
     devices: 0,
     onlineDevices: 0,
     services: 0,
+    runningServices: 0,
+    transitioningServices: 0,
+    stoppedServices: 0,
+    unknownServices: 0,
     alertServices: 0,
     gpuCount: 0,
     activeGpuCount: 0,
@@ -101,18 +105,76 @@ function compareText(left, right) {
 }
 
 function isAlertService(service) {
-  var status = String((service && (service.health || service.status)) || "").toLowerCase()
-  switch (status) {
-    case "":
-    case "healthy":
-    case "running":
-    case "starting":
-    case "created":
-    case "restarting":
-      return false
-    default:
-      return true
-  }
+  return serviceState(service) === "alert"
+}
+
+function isStoppedService(service) {
+  return serviceState(service) === "stopped"
+}
+
+function isTransitioningService(service) {
+  var status = String((service && service.status) || "").toLowerCase()
+  return status === "restarting" || status === "starting"
+}
+
+function isUnknownService(service) {
+  var status = String((service && service.status) || "").toLowerCase()
+  return status === "" || status === "unknown"
+}
+
+function serviceState(service) {
+  var status = String((service && service.status) || "").toLowerCase()
+  var health = String((service && service.health) || "").toLowerCase()
+  if (status === "stopped" || status === "exited" || status === "paused" || status === "created") return "stopped"
+  if (status === "error" || status === "failed" || status === "dead") return "alert"
+  if (status === "restarting" || status === "starting" || health === "starting") return "transitioning"
+  if (health === "unhealthy" || health === "error" || health === "failed" || health === "dead") return "alert"
+  if (status === "running" && (health === "" || health === "healthy")) return "running"
+  if (status === "" && health === "healthy") return "running"
+  return "unknown"
+}
+
+function isRunningService(service) {
+  return String((service && service.status) || "").toLowerCase() === "running"
+}
+
+function serviceSortRank(service) {
+  var state = serviceState(service)
+  if (state === "alert") return 0
+  if (isRunningService(service)) return 1
+  if (state === "transitioning") return 2
+  if (state === "stopped") return 3
+  return 4
+}
+
+function serviceDisplayState(service) {
+  var state = serviceState(service)
+  var status = String((service && service.status) || "").toLowerCase()
+  var health = String((service && service.health) || "").toLowerCase()
+  if (state === "stopped") return status || "stopped"
+  if (state === "transitioning") return health === "starting" ? "starting" : status || "starting"
+  if (state === "alert") return (status === "error" || status === "failed" || status === "dead") ? status : health || status || "error"
+  if (state === "running") return health || status || "running"
+  return status || health || "unknown"
+}
+
+function serviceGlyph(service) {
+  var state = serviceState(service)
+  if (state === "alert") return "⚠"
+  if (state === "stopped") return "○"
+  if (state === "transitioning") return "↻"
+  if (state === "unknown") return "?"
+  return "●"
+}
+
+function serviceSummary(totals) {
+  var value = totals || emptyTotals()
+  var summary = value.runningServices + " running"
+  if (value.transitioningServices > 0) summary += " · " + value.transitioningServices + " transitioning"
+  if (value.stoppedServices > 0) summary += " · " + value.stoppedServices + " stopped"
+  if (value.unknownServices > 0) summary += " · " + value.unknownServices + " unknown"
+  if (value.alertServices > 0) summary += " · " + value.alertServices + (value.alertServices === 1 ? " alert" : " alerts")
+  return summary
 }
 
 function isMonitoringService(service) {
@@ -223,7 +285,7 @@ function toFleetService(device, container) {
     name: inferServiceName(item.name, item.id),
     type: inferServiceType(item.name, item.image),
     image: String(item.image || ""),
-    status: String(item.status || "running"),
+    status: String(item.status || "unknown"),
     health: String(item.health || ""),
     deviceId: device.id,
     deviceLabel: device.label,
@@ -276,9 +338,8 @@ function normalizeFleet(devices, metrics) {
     }
   }
   fleetServices.sort(function(left, right) {
-    var leftAlert = isAlertService(left)
-    var rightAlert = isAlertService(right)
-    if (leftAlert !== rightAlert) return leftAlert ? -1 : 1
+    var rankCmp = serviceSortRank(left) - serviceSortRank(right)
+    if (rankCmp !== 0) return rankCmp
     var deviceCmp = compareText(left.deviceLabel, right.deviceLabel)
     if (deviceCmp !== 0) return deviceCmp
     var nameCmp = compareText(left.name, right.name)
@@ -306,11 +367,19 @@ function normalizeFleet(devices, metrics) {
     }
   }
   totals.services = fleetServices.length
+  totals.runningServices = 0
+  totals.transitioningServices = 0
+  totals.stoppedServices = 0
+  totals.unknownServices = 0
   totals.alertServices = 0
   var aiServices = []
   var monitoringServices = []
   for (i = 0; i < fleetServices.length; i++) {
     if (isAlertService(fleetServices[i])) totals.alertServices++
+    if (isRunningService(fleetServices[i])) totals.runningServices++
+    else if (isStoppedService(fleetServices[i])) totals.stoppedServices++
+    else if (isTransitioningService(fleetServices[i])) totals.transitioningServices++
+    else if (isUnknownService(fleetServices[i])) totals.unknownServices++
     if (isMonitoringService(fleetServices[i])) monitoringServices.push(fleetServices[i])
     else aiServices.push(fleetServices[i])
   }
@@ -392,8 +461,7 @@ function barTooltip(snapshot, phase, lastError) {
     ? "VRAM " + formatMemory(totals.gpuMemoryUsedMB) + " / " + formatMemory(totals.gpuMemoryTotalMB)
     : ""
   var nodes = totals.onlineDevices + "/" + totals.devices + " online"
-  var services = totals.services + " svc"
-  if (totals.alertServices > 0) services += " · " + totals.alertServices + " alert"
+  var services = serviceSummary(totals)
   return [gpu, vram, nodes, services].filter(function(part) { return part !== "" }).join(" · ")
 }
 

@@ -61,7 +61,7 @@ export function DashboardRoute(props: DashboardRouteProps) {
                 rowWidth={serviceRowWidth}
                 selectedContainerId={props.controller.selectedService?.containerId}
                 sectionFocused={props.controller.overviewSection === "ai"}
-                emptyText="No AI services are running."
+                emptyText="No AI services were reported."
                 maxRows={categoryRows}
               />
               <ServiceCategoryPane
@@ -71,7 +71,7 @@ export function DashboardRoute(props: DashboardRouteProps) {
                 rowWidth={serviceRowWidth}
                 selectedContainerId={props.controller.selectedService?.containerId}
                 sectionFocused={props.controller.overviewSection === "monitoring"}
-                emptyText="No monitoring services are running."
+                emptyText="No monitoring services were reported."
                 maxRows={categoryRows}
               />
             </box>
@@ -100,7 +100,7 @@ export function DashboardRoute(props: DashboardRouteProps) {
           rowWidth={Math.max(24, props.contentWidth - 8)}
           selectedContainerId={props.controller.selectedService?.containerId}
           sectionFocused={props.controller.overviewSection === "ai"}
-          emptyText="No AI services are running."
+          emptyText="No AI services were reported."
           maxRows={categoryRows}
         />
         <ServiceCategoryPane
@@ -110,7 +110,7 @@ export function DashboardRoute(props: DashboardRouteProps) {
           rowWidth={Math.max(24, props.contentWidth - 8)}
           selectedContainerId={props.controller.selectedService?.containerId}
           sectionFocused={props.controller.overviewSection === "monitoring"}
-          emptyText="No monitoring services are running."
+          emptyText="No monitoring services were reported."
           maxRows={categoryRows}
         />
         <box border borderStyle="single" borderColor={theme.colors.border} backgroundColor={theme.colors.panelMuted} padding={1} flexDirection="column" gap={1}>

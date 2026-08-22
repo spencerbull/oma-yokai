@@ -20,7 +20,7 @@ Column {
   PanelHero {
     width: parent.width
     title: "Services"
-    meta: snapshot.services.length + " across the fleet"
+    meta: Fleet.serviceSummary(snapshot.totals)
     detail: snapshot.totals.alertServices > 0 ? snapshot.totals.alertServices + " need attention" : "No reported alerts"
     foreground: root.foreground
     fontFamily: root.fontFamily
@@ -29,7 +29,7 @@ Column {
   Text {
     visible: snapshot.services.length === 0
     width: parent.width
-    text: "No running services were reported."
+    text: "No services were reported."
     color: root.dim
     font.family: root.fontFamily
     font.pixelSize: Style.font.body
@@ -50,8 +50,8 @@ Column {
         Column {
           width: Math.max(80, parent.width - serviceActions.implicitWidth - parent.spacing)
           spacing: Style.space(3)
-          Text { width: parent.width; text: (Fleet.isAlertService(modelData) ? "⚠ " : "● ") + modelData.name; color: Fleet.isAlertService(modelData) ? Color.urgent : root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true; elide: Text.ElideRight }
-          Text { width: parent.width; text: modelData.deviceLabel + " · " + modelData.type + " · " + (modelData.health || modelData.status); color: root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; elide: Text.ElideRight }
+          Text { width: parent.width; text: Fleet.serviceGlyph(modelData) + " " + modelData.name; color: Fleet.isAlertService(modelData) ? Color.urgent : Fleet.serviceState(modelData) === "running" ? root.foreground : root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true; elide: Text.ElideRight }
+          Text { width: parent.width; text: modelData.deviceLabel + " · " + modelData.type + " · " + Fleet.serviceDisplayState(modelData); color: root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; elide: Text.ElideRight }
           Text { width: parent.width; visible: modelData.generationTokPerSec > 0 || modelData.gpuMemoryMB > 0; text: Math.round(modelData.generationTokPerSec) + " tok/s · " + Fleet.formatMemory(modelData.gpuMemoryMB) + " GPU memory"; color: root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.caption; elide: Text.ElideRight }
         }
 

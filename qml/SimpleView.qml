@@ -26,7 +26,7 @@ Column {
     width: parent.width
     title: "OmaYokai"
     meta: root.phase === "ready"
-      ? (totals.onlineDevices + " online · " + totals.services + " services")
+      ? (totals.onlineDevices + " online · " + totals.runningServices + " running")
       : root.phase === "needs_install" ? "Service not installed"
       : root.phase === "starting" ? "Starting daemon"
       : root.phase === "error" ? "Daemon unavailable"
@@ -103,6 +103,7 @@ Column {
     }
 
     Yokai.InfoPair { label: "Nodes"; value: totals.onlineDevices + " online · " + Math.max(0, totals.devices - totals.onlineDevices) + " offline"; foreground: root.foreground; fontFamily: root.fontFamily }
+    Yokai.InfoPair { label: "Services"; value: Fleet.serviceSummary(totals); foreground: root.foreground; fontFamily: root.fontFamily }
     Yokai.InfoPair { label: "Alerts"; value: totals.alertServices > 0 ? String(totals.alertServices) : "none"; foreground: root.foreground; fontFamily: root.fontFamily }
   }
 
@@ -125,7 +126,7 @@ Column {
     Text {
       visible: snapshot.aiServices.length === 0
       width: parent.width
-      text: totals.devices === 0 ? "No devices yet. Dive in to add one." : "No AI services are running."
+      text: totals.devices === 0 ? "No devices yet. Dive in to add one." : "No AI services were reported."
       color: root.dim
       font.family: root.fontFamily
       font.pixelSize: Style.font.body
@@ -137,8 +138,8 @@ Column {
       delegate: Text {
         required property var modelData
         width: root.width
-        text: (Fleet.isAlertService(modelData) ? "⚠ " : "● ") + modelData.name + "  ·  " + modelData.deviceLabel
-        color: Fleet.isAlertService(modelData) ? root.urgent : root.foreground
+        text: Fleet.serviceGlyph(modelData) + " " + modelData.name + "  ·  " + modelData.deviceLabel
+        color: Fleet.isAlertService(modelData) ? root.urgent : Fleet.serviceState(modelData) === "running" ? root.foreground : root.dim
         font.family: root.fontFamily
         font.pixelSize: Style.font.body
         elide: Text.ElideRight

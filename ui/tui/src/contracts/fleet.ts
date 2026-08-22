@@ -122,6 +122,10 @@ export type FleetSnapshot = {
     devices: number
     onlineDevices: number
     services: number
+    runningServices: number
+    transitioningServices: number
+    stoppedServices: number
+    unknownServices: number
     alertServices: number
     gpuCount: number
     activeGpuCount: number

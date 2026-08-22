@@ -1,7 +1,7 @@
 import type { FleetService } from "../../contracts/fleet"
 import { MarqueeText } from "../shared/MarqueeText"
 import { useTheme } from "../../theme/context"
-import { isAlertService } from "./normalizeFleet"
+import { serviceDisplayState, serviceState } from "./normalizeFleet"
 
 type ServiceCategoryPaneProps = {
   onSelect?: (containerId: string) => void
@@ -43,7 +43,14 @@ export function ServiceCategoryPane(props: ServiceCategoryPaneProps) {
       ) : (
         rows.map((service) => {
           const selected = service.containerId === props.selectedContainerId
-          const color = isAlertService(service) ? theme.colors.danger : theme.colors.success
+          const state = serviceState(service)
+          const color = state === "alert"
+            ? theme.colors.danger
+            : state === "running"
+              ? theme.colors.success
+              : state === "transitioning"
+                ? theme.colors.accent
+                : theme.colors.textSubtle
 
           return (
             <box
@@ -54,7 +61,7 @@ export function ServiceCategoryPane(props: ServiceCategoryPaneProps) {
               onMouseDown={() => props.onSelect?.(service.containerId)}
             >
               <text fg={selected ? theme.colors.accent : color}>
-                {selected ? "▌" : service.deviceOnline ? "●" : "○"}
+                {selected ? "▌" : state === "alert" ? "!" : state === "transitioning" ? "↻" : state === "unknown" ? "?" : state === "stopped" || !service.deviceOnline ? "○" : "●"}
               </text>
               <text fg={selected ? theme.colors.accent : theme.colors.textMuted}>
                 {" "}
@@ -67,7 +74,7 @@ export function ServiceCategoryPane(props: ServiceCategoryPaneProps) {
                 width={Math.max(10, rowWidth - 28)}
               />
               <text fg={theme.colors.textSubtle}>
-                {` · ${truncate(service.deviceLabel, 12)} · ${truncate(service.health || service.status, 10)}`}
+                {` · ${truncate(service.deviceLabel, 12)} · ${truncate(serviceDisplayState(service), 10)}`}
               </text>
             </box>
           )

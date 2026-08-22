@@ -8,6 +8,8 @@ import type {
   MetricsResponse,
 } from "../../contracts/fleet"
 
+type ServiceStatus = Partial<Pick<FleetService, "health" | "status">>
+
 export function normalizeFleetSnapshot(devices: DeviceRecord[], metrics: MetricsResponse): FleetSnapshot {
   const fleetDevices: FleetDevice[] = devices
     .map((device) => toFleetDevice(device, metrics[device.id]))
@@ -30,6 +32,10 @@ export function normalizeFleetSnapshot(devices: DeviceRecord[], metrics: Metrics
       devices: fleetDevices.length,
       onlineDevices: fleetDevices.filter((device) => device.online).length,
       services: fleetServices.length,
+      runningServices: fleetServices.filter(isRunningService).length,
+      transitioningServices: fleetServices.filter(isTransitioningService).length,
+      stoppedServices: fleetServices.filter(isStoppedService).length,
+      unknownServices: fleetServices.filter(isUnknownService).length,
       alertServices: fleetServices.filter(isAlertService).length,
       gpuCount: fleetDevices.reduce((sum, device) => sum + device.gpuCount, 0),
       activeGpuCount: fleetDevices.reduce((sum, device) => sum + device.activeGpuCount, 0),
@@ -83,7 +89,7 @@ function toFleetService(device: FleetDevice, container: ContainerMetrics): Fleet
     type: inferServiceType(container.name, container.image),
     model: "",
     image: container.image ?? "",
-    status: container.status ?? "running",
+    status: container.status ?? "unknown",
     health: container.health ?? "",
     deviceId: device.id,
     deviceLabel: device.label,
@@ -102,10 +108,9 @@ function toFleetService(device: FleetDevice, container: ContainerMetrics): Fleet
 }
 
 function compareFleetServices(left: FleetService, right: FleetService) {
-  const leftAlert = isAlertService(left)
-  const rightAlert = isAlertService(right)
-  if (leftAlert !== rightAlert) {
-    return leftAlert ? -1 : 1
+  const rankComparison = serviceSortRank(left) - serviceSortRank(right)
+  if (rankComparison !== 0) {
+    return rankComparison
   }
 
   const deviceComparison = left.deviceLabel.localeCompare(right.deviceLabel)
@@ -116,19 +121,88 @@ function compareFleetServices(left: FleetService, right: FleetService) {
   return left.name.localeCompare(right.name)
 }
 
-export function isAlertService(service: Pick<FleetService, "health" | "status">) {
-  const status = (service.health || service.status || "").toLowerCase()
-  switch (status) {
-    case "":
-    case "healthy":
-    case "running":
-    case "starting":
-    case "created":
-    case "restarting":
-      return false
-    default:
-      return true
+export function isAlertService(service: ServiceStatus) {
+  return serviceState(service) === "alert"
+}
+
+export function isStoppedService(service: ServiceStatus) {
+  return serviceState(service) === "stopped"
+}
+
+export function isTransitioningService(service: ServiceStatus) {
+  const status = (service.status || "").toLowerCase()
+  return status === "restarting" || status === "starting"
+}
+
+export function isUnknownService(service: ServiceStatus) {
+  const status = (service.status || "").toLowerCase()
+  return status === "" || status === "unknown"
+}
+
+export type ServiceState = "running" | "transitioning" | "stopped" | "unknown" | "alert"
+
+export function serviceState(service: ServiceStatus): ServiceState {
+  const status = (service.status || "").toLowerCase()
+  const health = (service.health || "").toLowerCase()
+  if (status === "stopped" || status === "exited" || status === "paused" || status === "created") {
+    return "stopped"
   }
+  if (["error", "failed", "dead"].includes(status)) {
+    return "alert"
+  }
+  if (status === "restarting" || status === "starting" || health === "starting") {
+    return "transitioning"
+  }
+  if (["unhealthy", "error", "failed", "dead"].includes(health)) {
+    return "alert"
+  }
+  if ((status === "running" && (health === "" || health === "healthy")) || (status === "" && health === "healthy")) {
+    return "running"
+  }
+  return "unknown"
+}
+
+export function isRunningService(service: ServiceStatus) {
+  return (service.status || "").toLowerCase() === "running"
+}
+
+function serviceSortRank(service: ServiceStatus) {
+  const state = serviceState(service)
+  if (state === "alert") return 0
+  if (isRunningService(service)) return 1
+  if (state === "transitioning") return 2
+  if (state === "stopped") return 3
+  return 4
+}
+
+export function serviceDisplayState(service: ServiceStatus) {
+  const state = serviceState(service)
+  const status = (service.status || "").toLowerCase()
+  const health = (service.health || "").toLowerCase()
+  if (state === "stopped") return status || "stopped"
+  if (state === "transitioning") return health === "starting" ? "starting" : status || "starting"
+  if (state === "alert") return ["error", "failed", "dead"].includes(status) ? status : health || status || "error"
+  if (state === "running") return health || status || "running"
+  return status || health || "unknown"
+}
+
+export function formatServiceSummary(
+  totals: Pick<FleetSnapshot["totals"], "runningServices" | "transitioningServices" | "stoppedServices" | "unknownServices" | "alertServices">,
+) {
+  const parts = [`${totals.runningServices} running`]
+  if (totals.transitioningServices > 0) {
+    parts.push(`${totals.transitioningServices} transitioning`)
+  }
+  if (totals.stoppedServices > 0) {
+    parts.push(`${totals.stoppedServices} stopped`)
+  }
+  if (totals.unknownServices > 0) {
+    parts.push(`${totals.unknownServices} unknown`)
+  }
+  if (totals.alertServices > 0) {
+    parts.push(`${totals.alertServices} ${totals.alertServices === 1 ? "alert" : "alerts"}`)
+  }
+  return parts.join(" · ")
 }
 
 export function isMonitoringService(service: Pick<FleetService, "name" | "type" | "image">) {

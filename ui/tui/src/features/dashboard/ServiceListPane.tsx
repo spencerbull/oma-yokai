@@ -1,6 +1,6 @@
 import type { FleetService } from "../../contracts/fleet"
 import { useTheme } from "../../theme/context"
-import { isAlertService } from "./normalizeFleet"
+import { serviceDisplayState, serviceState } from "./normalizeFleet"
 
 type ServiceListPaneProps = {
   services: FleetService[]
@@ -32,16 +32,19 @@ export function ServiceListPane(props: ServiceListPaneProps) {
       <text fg={theme.colors.textSubtle}>{headerLine(props.terminalWidth)}</text>
 
       {rows.length === 0 ? (
-        <text fg={theme.colors.textSubtle}>No OmaYokai services are running yet.</text>
+        <text fg={theme.colors.textSubtle}>No OmaYokai services were reported.</text>
       ) : (
         rows.map((service, index) => {
           const absoluteIndex = start + index
           const selected = absoluteIndex === props.selectedIndex
-          const statusColor = isAlertService(service)
+          const state = serviceState(service)
+          const statusColor = state === "alert"
             ? theme.colors.danger
-            : service.deviceOnline
+            : state === "running" && service.deviceOnline
               ? theme.colors.success
-              : theme.colors.textSubtle
+              : state === "transitioning"
+                ? theme.colors.accent
+                : theme.colors.textSubtle
 
           return (
             <text key={service.containerId} fg={selected ? theme.colors.text : theme.colors.textMuted}>
@@ -67,19 +70,21 @@ function headerLine(terminalWidth: number) {
 
 function rowLine(service: FleetService, terminalWidth: number) {
   if (terminalWidth < 120) {
-    return `${pad(truncate(service.name, 18), 18)} ${pad(truncate(service.deviceLabel, 12), 12)} ${pad(truncate(service.health || service.status, 10), 10)} ${pad(formatRate(service.generationTokPerSec), 7)}`
+    return `${pad(truncate(service.name, 18), 18)} ${pad(truncate(service.deviceLabel, 12), 12)} ${pad(truncate(serviceDisplayState(service), 10), 10)} ${pad(formatRate(service.generationTokPerSec), 7)}`
   }
 
-  return `${pad(truncate(service.name, 20), 20)} ${pad(truncate(service.deviceLabel, 14), 14)} ${pad(truncate(service.health || service.status, 10), 10)} ${pad(formatMemory(service.gpuMemoryMB), 8)} ${pad(formatRate(service.generationTokPerSec), 7)}`
+  return `${pad(truncate(service.name, 20), 20)} ${pad(truncate(service.deviceLabel, 14), 14)} ${pad(truncate(serviceDisplayState(service), 10), 10)} ${pad(formatMemory(service.gpuMemoryMB), 8)} ${pad(formatRate(service.generationTokPerSec), 7)}`
 }
 
 function healthGlyph(service: Pick<FleetService, "health" | "status" | "deviceOnline">) {
   if (!service.deviceOnline) {
     return "○"
   }
-  if (isAlertService({ health: service.health, status: service.status } as Pick<FleetService, "health" | "status">)) {
-    return "!"
-  }
+  const state = serviceState(service)
+  if (state === "alert") return "!"
+  if (state === "stopped") return "○"
+  if (state === "transitioning") return "↻"
+  if (state === "unknown") return "?"
   return "●"
 }
 
