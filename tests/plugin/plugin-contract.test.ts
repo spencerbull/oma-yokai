@@ -46,6 +46,12 @@ describe("native plugin contract", () => {
   })
 
   test("all deliberate panel views exist and destructive actions use confirmation controls", () => {
+    const panel = read("Panel.qml")
+    expect(panel).toContain('import "qml" as YokaiViews')
+    expect(panel).toContain("YokaiViews.SimpleView")
+    expect(panel).toContain("YokaiViews.DeepView")
+    expect(panel).not.toMatch(/^\s*(SimpleView|DeepView)\s*\{/m)
+
     for (const name of ["Overview", "Devices", "Services", "Deploy", "Settings"]) {
       expect(lstatSync(join(root, `qml/views/${name}View.qml`)).isFile()).toBe(true)
       expect(read("qml/DeepView.qml")).toContain(`Views.${name}View`)

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import qs.Commons
 import qs.Ui
+import "qml" as YokaiViews
 
 Panel {
   id: root
@@ -96,7 +97,7 @@ Panel {
           id: panelContent
           width: scroll.width
 
-          SimpleView {
+          YokaiViews.SimpleView {
             visible: !root.deepMode
             width: parent.width
             yokai: root.yokai
@@ -107,7 +108,7 @@ Panel {
             onRefreshRequested: if (root.yokai && root.yokai.refresh) root.yokai.refresh()
           }
 
-          DeepView {
+          YokaiViews.DeepView {
             id: deepView
             visible: root.deepMode
             width: parent.width
