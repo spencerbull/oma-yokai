@@ -71,7 +71,7 @@ func AddEndpointsToFile(path string, endpoints []Endpoint) error {
 		providers = make(map[string]interface{})
 	}
 	providers[ProviderKey] = map[string]interface{}{
-		"name":     "Yokai",
+		"name":     "OmaYokai",
 		"base_url": ep.BaseURL,
 	}
 	cfg["model_providers"] = providers

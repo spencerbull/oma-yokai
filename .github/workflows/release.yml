@@ -2,32 +2,15 @@ name: Release
 
 on:
   push:
-    branches: [main]
-    # Also allow manual tag pushes as a fallback
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  # Skip release job if the commit was made by the release bot (avoid loops)
-  check:
-    runs-on: ubuntu-latest
-    outputs:
-      should_release: ${{ steps.check.outputs.should_release }}
-    steps:
-      - id: check
-        run: |
-          if [[ "${{ github.event.head_commit.author.username }}" == "github-actions[bot]" ]]; then
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
-          fi
-
   release:
-    needs: check
-    if: needs.check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

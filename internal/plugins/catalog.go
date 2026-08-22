@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/config"
 )
 
 type Asset struct {

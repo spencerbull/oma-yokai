@@ -4,12 +4,48 @@ set -eu
 METHOD="${1:?method is required}"
 PATH_ARG="${2:?path is required}"
 ADDR="${3:-127.0.0.1:7473}"
-BODY="${4:-}"
+BODY_MODE="${4:-}"
+BODY=""
+
+case "$METHOD" in
+  GET|POST|PUT|PATCH|DELETE) ;;
+  *) printf 'unsupported HTTP method: %s\n' "$METHOD" >&2; exit 64 ;;
+esac
+
+HOST_PART="${ADDR%:*}"
+PORT_PART="${ADDR##*:}"
+case "$HOST_PART" in localhost|127.0.0.1|'[::1]') ;; *) printf 'daemon address must be loopback host:port\n' >&2; exit 64 ;; esac
+case "$PORT_PART" in ''|*[!0-9]*) printf 'daemon port must be numeric\n' >&2; exit 64 ;; esac
+[ "$PORT_PART" -ge 1 ] && [ "$PORT_PART" -le 65535 ] || { printf 'daemon port is out of range\n' >&2; exit 64; }
+
+case "$PATH_ARG" in
+  /*) ;;
+  *) printf 'API path must start with /\n' >&2; exit 64 ;;
+esac
+case "$PATH_ARG" in
+  *'
+'*|*''*) printf 'API path may not contain control characters\n' >&2; exit 64 ;;
+esac
 
 URL="http://${ADDR}${PATH_ARG}"
 
+case "$BODY_MODE" in
+  '') ;;
+  --stdin-json)
+    if ! IFS= read -r BODY; then
+      printf 'JSON body was not provided on stdin\n' >&2
+      exit 64
+    fi
+    ;;
+  *)
+    printf 'unsupported body transport\n' >&2
+    exit 64
+    ;;
+esac
+
 if [ -n "$BODY" ]; then
-  curl -fsS --max-time 30 -X "$METHOD" -H "Content-Type: application/json" --data "$BODY" "$URL"
+  curl --fail-with-body --silent --show-error --max-time 30 \
+    --request "$METHOD" --header "Content-Type: application/json" --data-raw "$BODY" --url "$URL"
 else
-  curl -fsS --max-time 30 -X "$METHOD" "$URL"
+  curl --fail-with-body --silent --show-error --max-time 30 --request "$METHOD" --url "$URL"
 fi

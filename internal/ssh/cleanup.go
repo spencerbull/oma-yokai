@@ -88,7 +88,7 @@ func cleanupDevice(client remoteRunner, opts CleanupOptions) error {
 	return nil
 }
 
-// CleanupDevice removes Yokai artifacts from a remote device.
+// CleanupDevice removes OmaYokai artifacts from a remote device.
 // It supports both user-level and system-level installs.
 func CleanupDevice(client *Client, opts CleanupOptions) error {
 	return cleanupDevice(client, opts)

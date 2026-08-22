@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/hf"
+	"github.com/spencerbull/oma-yokai/internal/hf"
 )
 
 func (d *Daemon) currentHFToken() string {

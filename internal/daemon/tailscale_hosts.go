@@ -3,8 +3,8 @@ package daemon
 import (
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/tailscale"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/tailscale"
 )
 
 func currentTailscaleStatus() *tailscale.Status {

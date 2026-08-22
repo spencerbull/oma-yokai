@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	assetspkg "github.com/spencerbull/yokai/assets"
+	assetspkg "github.com/spencerbull/oma-yokai/assets"
 )
 
 type remoteClient interface {

@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test"
 import { resolveAppSurface } from "./surface"
 
 describe("resolveAppSurface", () => {
-  test("shows the Yokai home screen before devices are configured", () => {
+  test("shows the OmaYokai home screen before devices are configured", () => {
     expect(resolveAppSurface("home", "loading", 0)).toBe("home")
     expect(resolveAppSurface("home", "ready", 0)).toBe("home")
   })

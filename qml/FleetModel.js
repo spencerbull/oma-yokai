@@ -52,6 +52,13 @@ function asObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {}
 }
 
+function asStringList(value) {
+  var input = asArray(value)
+  var output = []
+  for (var i = 0; i < input.length; i++) output.push(String(input[i] || ""))
+  return output
+}
+
 function numberOr(value, fallback) {
   var n = Number(value)
   return isFinite(n) ? n : fallback
@@ -83,6 +90,14 @@ function averageOf(values) {
   var sum = 0
   for (var i = 0; i < list.length; i++) sum += numberOr(list[i], 0)
   return sum / list.length
+}
+
+function compareText(left, right) {
+  var a = String(left || "")
+  var b = String(right || "")
+  if (a < b) return -1
+  if (a > b) return 1
+  return 0
 }
 
 function isAlertService(service) {
@@ -136,7 +151,9 @@ function inferServiceName(name, fallback) {
 
 function externalPort(ports) {
   var map = asObject(ports)
-  for (var key in map) {
+  var keys = Object.keys(map).sort(compareText)
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i]
     var parsed = parseInt(map[key], 10)
     if (isFinite(parsed)) return parsed
   }
@@ -217,7 +234,10 @@ function toFleetService(device, container) {
     gpuMemoryMB: numberOr(item.gpu_memory_mb, 0),
     uptimeSeconds: numberOr(item.uptime_seconds, 0),
     generationTokPerSec: numberOr(item.generation_tok_per_s, 0),
-    promptTokPerSec: numberOr(item.prompt_tok_per_s, 0)
+    promptTokPerSec: numberOr(item.prompt_tok_per_s, 0),
+    promptTokensTotal: numberOr(item.prompt_tokens_total, 0),
+    generationTokensTotal: numberOr(item.generation_tokens_total, 0),
+    cachedPromptTokensTotal: numberOr(item.cached_prompt_tokens_total, 0)
   }
 }
 
@@ -242,7 +262,10 @@ function normalizeFleet(devices, metrics) {
     var raw = asObject(deviceList[i])
     fleetDevices.push(toFleetDevice(raw, metricsMap[raw.id]))
   }
-  fleetDevices.sort(function(a, b) { return a.label.localeCompare(b.label) })
+  fleetDevices.sort(function(a, b) {
+    var labelCmp = compareText(a.label, b.label)
+    return labelCmp !== 0 ? labelCmp : compareText(a.id, b.id)
+  })
 
   for (i = 0; i < fleetDevices.length; i++) {
     var device = fleetDevices[i]
@@ -256,9 +279,10 @@ function normalizeFleet(devices, metrics) {
     var leftAlert = isAlertService(left)
     var rightAlert = isAlertService(right)
     if (leftAlert !== rightAlert) return leftAlert ? -1 : 1
-    var deviceCmp = left.deviceLabel.localeCompare(right.deviceLabel)
+    var deviceCmp = compareText(left.deviceLabel, right.deviceLabel)
     if (deviceCmp !== 0) return deviceCmp
-    return left.name.localeCompare(right.name)
+    var nameCmp = compareText(left.name, right.name)
+    return nameCmp !== 0 ? nameCmp : compareText(left.containerId, right.containerId)
   })
 
   var gpuUtils = []
@@ -310,26 +334,58 @@ function normalizePayload(payload) {
   var devices = asArray(devicesBody.devices)
   if (devices.length === 0 && Array.isArray(body.devices)) devices = body.devices
   var fleet = normalizeFleet(devices, body.metrics)
-  fleet.settings = asObject(body.settings)
-  if (!fleet.settings.hf) fleet.settings = emptySettings()
+  var defaults = emptySettings()
+  var rawSettings = asObject(body.settings)
+  var rawHF = asObject(rawSettings.hf)
+  var rawPreferences = asObject(rawSettings.preferences)
+  var rawHistory = asObject(rawSettings.history)
+  var rawIntegrations = asObject(rawSettings.integrations)
+  var integrationNames = ["vscode", "opencode", "openclaw", "claudecode", "codex"]
+  var integrations = {}
+  for (var i = 0; i < integrationNames.length; i++) {
+    var integrationName = integrationNames[i]
+    var rawIntegration = asObject(rawIntegrations[integrationName])
+    integrations[integrationName] = {
+      available: rawIntegration.available === true,
+      configured: rawIntegration.configured === true
+    }
+  }
+  fleet.settings = {
+    hf: {
+      configured: rawHF.configured === true,
+      source: String(rawHF.source || defaults.hf.source),
+      username: String(rawHF.username || defaults.hf.username)
+    },
+    preferences: {
+      theme: String(rawPreferences.theme || defaults.preferences.theme),
+      default_vllm_image: String(rawPreferences.default_vllm_image || ""),
+      default_llama_image: String(rawPreferences.default_llama_image || ""),
+      default_comfyui_image: String(rawPreferences.default_comfyui_image || "")
+    },
+    history: {
+      images: asStringList(rawHistory.images),
+      models: asStringList(rawHistory.models)
+    },
+    integrations: integrations
+  }
   return fleet
 }
 
 function barLabel(snapshot, phase) {
-  if (phase === "needs_install") return "Yokai"
-  if (phase === "starting" || phase === "checking") return "Yokai"
+  if (phase === "needs_install") return "OmaYokai"
+  if (phase === "starting" || phase === "checking") return "OmaYokai"
   var totals = snapshot && snapshot.totals ? snapshot.totals : emptyTotals()
   if (totals.alertServices > 0) return "⚠ " + totals.alertServices
   if (totals.gpuCount > 0) return formatPercent(totals.avgGpuUtilPercent)
   if (totals.onlineDevices > 0) return String(totals.onlineDevices)
-  return "Yokai"
+  return "OmaYokai"
 }
 
 function barTooltip(snapshot, phase, lastError) {
-  if (phase === "needs_install") return "Yokai is not installed yet"
-  if (phase === "starting") return "Starting Yokai daemon"
-  if (phase === "checking") return "Checking Yokai daemon"
-  if (phase === "error") return lastError || "Yokai daemon is unavailable"
+  if (phase === "needs_install") return "OmaYokai is not installed yet"
+  if (phase === "starting") return "Starting OmaYokai daemon"
+  if (phase === "checking") return "Checking OmaYokai daemon"
+  if (phase === "error") return lastError || "OmaYokai daemon is unavailable"
   var totals = snapshot && snapshot.totals ? snapshot.totals : emptyTotals()
   var gpu = totals.gpuCount > 0 ? "GPU " + formatPercent(totals.avgGpuUtilPercent) : "no GPUs"
   var vram = totals.gpuMemoryTotalMB > 0

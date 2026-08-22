@@ -1,5 +1,5 @@
 {
-  "name": "@yokai/tui",
+  "name": "@oma-yokai/tui",
   "private": true,
   "type": "module",
   "scripts": {

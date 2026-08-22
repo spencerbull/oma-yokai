@@ -3,7 +3,7 @@ package daemon
 import (
 	"testing"
 
-	"github.com/spencerbull/yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/config"
 )
 
 func TestPersistDeployResult(t *testing.T) {

@@ -1,4 +1,4 @@
-# Contributing to yokai
+# Contributing to OmaYokai
 
 Thanks for your interest in contributing to yokai. This guide covers everything you need to get started.
 
@@ -18,8 +18,8 @@ Thanks for your interest in contributing to yokai. This guide covers everything 
 ### Clone and Build
 
 ```bash
-git clone https://github.com/spencerbull/yokai.git
-cd yokai
+git clone https://github.com/spencerbull/oma-yokai.git
+cd oma-yokai
 make build
 ```
 
@@ -125,7 +125,7 @@ import (
 
     "github.com/pelletier/go-toml/v2"         // third-party
 
-    "github.com/spencerbull/yokai/internal/config"  // internal
+    "github.com/spencerbull/oma-yokai/internal/config"  // internal
 )
 ```
 

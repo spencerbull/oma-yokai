@@ -31,7 +31,6 @@ Item {
   property string actionStatus: ""
   property string actionError: ""
   property var snapshot: Fleet.emptySnapshot()
-  property var pendingCallback: null
   property var pendingAction: null
   property bool snapshotInFlight: false
   property bool daemonStartAttempted: false
@@ -47,6 +46,41 @@ Item {
 
   function scriptPath(name) {
     return pluginDir ? pluginDir + "/scripts/" + name : ""
+  }
+
+  function pathSegment(value) {
+    return encodeURIComponent(String(value == null ? "" : value))
+  }
+
+  function safeError(raw, fallback) {
+    var text = String(raw || "").trim()
+    if (!text) return fallback
+    text = text.replace(/("(?:token|password|secret)"\s*:\s*")[^"]*(")/gi, "$1[redacted]$2")
+    text = text.replace(/((?:token|password|secret)\s*[=:]\s*)\S+/gi, "$1[redacted]")
+    return text.length > 500 ? text.slice(0, 497) + "..." : text
+  }
+
+  function snapshotErrorCode(raw) {
+    var lines = String(raw || "").trim().split("\n")
+    for (var i = lines.length - 1; i >= 0; i--) {
+      try {
+        var parsed = JSON.parse(lines[i])
+        if (parsed && parsed.error) return String(parsed.error)
+      } catch (e) {
+        // Curl may have written a diagnostic before the script's final JSON error.
+      }
+    }
+    return ""
+  }
+
+  function snapshotErrorMessage(code) {
+    switch (code) {
+      case "devices_unavailable": return "OmaYokai devices are temporarily unavailable"
+      case "metrics_unavailable": return "OmaYokai metrics are temporarily unavailable"
+      case "settings_unavailable": return "OmaYokai settings are temporarily unavailable"
+      case "jq_not_found": return "The OmaYokai plugin requires jq"
+      default: return "OmaYokai daemon is not reachable at " + daemonAddr
+    }
   }
 
   function refresh() {
@@ -76,41 +110,42 @@ Item {
 
   function runApi(method, path, body, okMessage) {
     if (!binaryPath) {
-      actionError = "Yokai is not installed"
+      actionError = "OmaYokai is not installed"
       return false
     }
     if (actionProc.running) {
-      actionError = "Another Yokai action is still running"
+      actionError = "Another OmaYokai action is still running"
       return false
     }
     actionError = ""
     actionStatus = okMessage || (method + " " + path)
     pendingAction = { method: method, path: path, message: okMessage || "" }
+    actionProc.pendingBody = body && body !== "" ? String(body) : ""
     var command = [scriptPath("yokai-api"), method, path, daemonAddr]
-    if (body && body !== "") command.push(body)
+    if (actionProc.pendingBody !== "") command.push("--stdin-json")
     actionProc.command = command
     actionProc.running = true
     return true
   }
 
   function stopService(deviceId, containerId) {
-    return runApi("POST", "/containers/" + deviceId + "/" + containerId + "/stop", "", "Stopping service")
+    return runApi("POST", "/containers/" + pathSegment(deviceId) + "/" + pathSegment(containerId) + "/stop", "", "Stopping service")
   }
 
   function restartService(deviceId, containerId) {
-    return runApi("POST", "/containers/" + deviceId + "/" + containerId + "/restart", "", "Restarting service")
+    return runApi("POST", "/containers/" + pathSegment(deviceId) + "/" + pathSegment(containerId) + "/restart", "", "Restarting service")
   }
 
   function removeService(deviceId, containerId) {
-    return runApi("DELETE", "/containers/" + deviceId + "/" + containerId + "/remove", "", "Removing service")
+    return runApi("DELETE", "/containers/" + pathSegment(deviceId) + "/" + pathSegment(containerId) + "/remove", "", "Removing service")
   }
 
   function testDevice(deviceId) {
-    return runApi("POST", "/devices/" + deviceId + "/test", "", "Testing device")
+    return runApi("POST", "/devices/" + pathSegment(deviceId) + "/test", "", "Testing device")
   }
 
   function removeDevice(deviceId) {
-    return runApi("DELETE", "/devices/" + deviceId, "", "Removing device")
+    return runApi("DELETE", "/devices/" + pathSegment(deviceId), "", "Removing device")
   }
 
   function bootstrapDevice(payload) {
@@ -143,11 +178,11 @@ Item {
 
   function launchTui() {
     if (!binaryPath) {
-      actionError = "Yokai is not installed"
+      actionError = "OmaYokai is not installed"
       return false
     }
     Quickshell.execDetached(["omarchy", "launch", "tui", "--app-id=yokai", binaryPath])
-    actionStatus = "Opening Yokai TUI"
+    actionStatus = "Opening OmaYokai TUI"
     return true
   }
 
@@ -156,11 +191,11 @@ Item {
     if (!path) {
       phase = "needs_install"
       binaryPath = ""
-      lastError = "Install the Yokai service with make install from this plugin directory"
+      lastError = "Install the OmaYokai service with make install from this plugin directory"
       return
     }
     binaryPath = path
-    if (!daemonStartAttempted) {
+    if ((phase === "checking" || phase === "needs_install") && !daemonStartAttempted) {
       daemonStartAttempted = true
       ensureDaemon()
       return
@@ -172,13 +207,16 @@ Item {
     snapshotInFlight = false
     var text = String(raw || "").trim()
     if (exitCode !== 0 || text === "") {
-      if (!daemonStartAttempted) {
+      var errorCode = snapshotErrorCode(text)
+      var daemonUnavailable = errorCode === "" || errorCode === "daemon_unreachable"
+      if (daemonUnavailable && !daemonStartAttempted) {
         daemonStartAttempted = true
         ensureDaemon()
         return
       }
       phase = "error"
-      lastError = "Yokai daemon is not reachable at " + daemonAddr
+      lastError = snapshotErrorMessage(errorCode)
+      daemonStartAttempted = false
       return
     }
     try {
@@ -191,16 +229,18 @@ Item {
       snapshot = Fleet.normalizePayload(parsed)
       phase = "ready"
       lastError = ""
+      daemonStartAttempted = false
     } catch (e) {
       phase = "error"
-      lastError = "Could not parse Yokai snapshot"
+      lastError = "Could not parse OmaYokai snapshot"
+      daemonStartAttempted = false
     }
   }
 
   function applyAction(raw, exitCode) {
     var text = String(raw || "").trim()
     if (exitCode !== 0) {
-      actionError = text || "Yokai action failed"
+      actionError = safeError(text, "OmaYokai action failed")
       actionStatus = ""
       pendingAction = null
       return
@@ -223,21 +263,23 @@ Item {
   Process {
     id: whichProc
     stdout: StdioCollector {
+      id: whichOut
       waitForEnd: true
-      onStreamFinished: root.applyWhich(text)
     }
     onExited: function(exitCode) {
-      if (exitCode !== 0) root.applyWhich("")
+      root.applyWhich(exitCode === 0 ? whichOut.text : "")
     }
   }
 
   Process {
     id: startProc
-    stdout: StdioCollector { waitForEnd: true }
+    stdout: StdioCollector { id: startOut; waitForEnd: true }
+    stderr: StdioCollector { id: startErr; waitForEnd: true }
     onExited: function(exitCode) {
       if (exitCode !== 0) {
         root.phase = "error"
-        root.lastError = "Could not start the Yokai daemon"
+        root.lastError = root.safeError(startErr.text || startOut.text, "Could not start the OmaYokai daemon")
+        root.daemonStartAttempted = false
         return
       }
       startGrace.start()
@@ -257,13 +299,23 @@ Item {
       id: snapshotOut
       waitForEnd: true
     }
+    stderr: StdioCollector {
+      id: snapshotErr
+      waitForEnd: true
+    }
     onExited: function(exitCode) {
-      root.applySnapshot(snapshotOut.text, exitCode)
+      root.applySnapshot(exitCode === 0 ? snapshotOut.text : snapshotErr.text, exitCode)
     }
   }
 
   Process {
     id: actionProc
+    property string pendingBody: ""
+    stdinEnabled: true
+    onStarted: {
+      if (pendingBody !== "") write(pendingBody + "\n")
+      pendingBody = ""
+    }
     stdout: StdioCollector {
       id: actionOut
       waitForEnd: true
@@ -273,7 +325,8 @@ Item {
       waitForEnd: true
     }
     onExited: function(exitCode) {
-      root.applyAction(exitCode === 0 ? actionOut.text : actionErr.text, exitCode)
+      pendingBody = ""
+      root.applyAction(exitCode === 0 ? actionOut.text : (actionOut.text || actionErr.text), exitCode)
     }
   }
 }

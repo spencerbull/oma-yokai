@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/config"
 )
 
 // daemonClient talks to the local yokai daemon API.

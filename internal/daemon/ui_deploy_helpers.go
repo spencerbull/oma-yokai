@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/bkc"
-	"github.com/spencerbull/yokai/internal/hfmem"
+	"github.com/spencerbull/oma-yokai/internal/bkc"
+	"github.com/spencerbull/oma-yokai/internal/hfmem"
 )
 
 type deployBKCResponse struct {

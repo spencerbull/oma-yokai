@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
-	sshpkg "github.com/spencerbull/yokai/internal/ssh"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	sshpkg "github.com/spencerbull/oma-yokai/internal/ssh"
 )
 
 type deviceStatus struct {

@@ -88,7 +88,7 @@ func TestFindExtractedBinaryFindsArchiveRootBinary(t *testing.T) {
 
 func TestFindExtractedBinaryFindsNestedBinary(t *testing.T) {
 	tempDir := t.TempDir()
-	nestedDir := filepath.Join(tempDir, "Yokai_0.1.0_darwin_arm64")
+	nestedDir := filepath.Join(tempDir, "OmaYokai_0.1.0_darwin_arm64")
 	if err := os.MkdirAll(nestedDir, 0755); err != nil {
 		t.Fatalf("mkdir nested dir: %v", err)
 	}

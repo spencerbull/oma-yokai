@@ -13,13 +13,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/platform"
+	"github.com/spencerbull/oma-yokai/internal/platform"
 )
 
 const (
-	latestReleaseURL = "https://github.com/spencerbull/yokai/releases/latest"
-	repoBaseURL      = "https://github.com/spencerbull/yokai/releases/download"
-	projectName      = "Yokai"
+	latestReleaseURL = "https://github.com/spencerbull/oma-yokai/releases/latest"
+	repoBaseURL      = "https://github.com/spencerbull/oma-yokai/releases/download"
+	projectName      = "OmaYokai"
 	mainBinary       = "yokai"
 	tuiBinary        = "yokai-tui"
 )

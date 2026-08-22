@@ -32,7 +32,7 @@ export function ServiceListPane(props: ServiceListPaneProps) {
       <text fg={theme.colors.textSubtle}>{headerLine(props.terminalWidth)}</text>
 
       {rows.length === 0 ? (
-        <text fg={theme.colors.textSubtle}>No Yokai services are running yet.</text>
+        <text fg={theme.colors.textSubtle}>No OmaYokai services are running yet.</text>
       ) : (
         rows.map((service, index) => {
           const absoluteIndex = start + index

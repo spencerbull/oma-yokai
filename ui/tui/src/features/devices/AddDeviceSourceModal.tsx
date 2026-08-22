@@ -16,7 +16,7 @@ export const ADD_DEVICE_SOURCES = [
   },
   {
     title: "Tailscale",
-    description: "Browse online Tailscale peers with Yokai AI GPU tag highlighting.",
+    description: "Browse online Tailscale peers with OmaYokai AI GPU tag highlighting.",
   },
 ] as const
 

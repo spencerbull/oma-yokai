@@ -1,6 +1,6 @@
 # Daemon UI API
 
-This document defines the UI-neutral daemon API contract for Yokai's OpenTUI frontend and any future clients.
+This document defines the UI-neutral daemon API contract for OmaYokai's OpenTUI frontend and any future clients.
 
 The goal is to keep the Go backend reusable across multiple interfaces while the OpenTUI React client under `ui/tui` remains a thin shell over daemon-owned behavior.
 
@@ -17,7 +17,7 @@ It does not replace the agent API documented in `06-agent-api.md`.
 ## Package Decision
 
 - frontend package location: `ui/tui`
-- frontend package name: `@yokai/tui`
+- frontend package name: `@oma-yokai/tui`
 - backend boundary: existing local daemon process
 
 The frontend talks to the daemon over REST and SSE only. It should not directly:
@@ -261,7 +261,7 @@ Response:
   },
   "error": "",
   "install_instructions": "Install Tailscale...",
-  "tag_help": "Recommended Yokai tag: tag:ai-gpu..."
+  "tag_help": "Recommended OmaYokai tag: tag:ai-gpu..."
 }
 ```
 
@@ -434,7 +434,7 @@ Current behavior:
 - SSH connect to the target host
 - run preflight checks
 - build a target-specific `yokai` binary locally
-- deploy the remote Yokai agent and generate/store an agent token
+- deploy the remote OmaYokai agent and generate/store an agent token
 - optionally deploy the monitoring stack (Prometheus, Grafana, Node Exporter, and GPU monitoring when applicable)
 - persist the device in local config
 - hot-reload daemon runtime state so tunnels and polling start automatically
@@ -475,7 +475,7 @@ Response:
   "agent_token": "generated-token",
   "install_monitoring": true,
   "monitoring_installed": true,
-  "message": "Bootstrapped gaming-rig and deployed the Yokai agent"
+  "message": "Bootstrapped gaming-rig and deployed the OmaYokai agent"
 }
 ```
 
@@ -575,7 +575,7 @@ Deploys the selected service to the target device agent.
 
 Current behavior in the new daemon-owned flow:
 
-- forwards the deploy request to the remote Yokai agent
+- forwards the deploy request to the remote OmaYokai agent
 - persists the deployed service in local config on success
 - stores container ID, model, image, port, env, volumes, plugins, runtime, and service type
 

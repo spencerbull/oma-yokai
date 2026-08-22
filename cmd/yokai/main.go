@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spencerbull/yokai/internal/agent"
-	"github.com/spencerbull/yokai/internal/cli"
-	"github.com/spencerbull/yokai/internal/daemon"
-	"github.com/spencerbull/yokai/internal/opentui"
-	"github.com/spencerbull/yokai/internal/upgrade"
+	"github.com/spencerbull/oma-yokai/internal/agent"
+	"github.com/spencerbull/oma-yokai/internal/cli"
+	"github.com/spencerbull/oma-yokai/internal/daemon"
+	"github.com/spencerbull/oma-yokai/internal/opentui"
+	"github.com/spencerbull/oma-yokai/internal/upgrade"
 )
 
 var (

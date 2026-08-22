@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/spencerbull/yokai/internal/hf"
+	"github.com/spencerbull/oma-yokai/internal/hf"
 )
 
 // ggufHostDir is the directory on the agent host where downloaded GGUF shards

@@ -414,7 +414,7 @@ func init() {
 			Quantization:    QuantNVFP4,
 			Arch:            ArchBlackwell,
 			Notes: []string{
-				"Uses dotted speculative-config arguments instead of JSON so Yokai passes them as clean argv tokens.",
+				"Uses dotted speculative-config arguments instead of JSON so OmaYokai passes them as clean argv tokens.",
 				"Targets GB10 / DGX Spark, single RTX PRO 6000 Blackwell, and larger Blackwell GPUs.",
 			},
 		},

@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/ssh"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/ssh"
 )
 
 // TunnelPool manages SSH tunnels to remote devices

@@ -144,7 +144,7 @@ function routeForActive(routes: readonly RouteDefinition[], activeRoute: AppRout
       id: "dashboard" as AppRouteId,
       label: "Dashboard",
       status: "Active",
-      summary: "Yokai OpenTUI shell",
+      summary: "OmaYokai OpenTUI shell",
     }
   )
 }

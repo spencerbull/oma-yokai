@@ -3,26 +3,34 @@ set -eu
 
 ADDR="${1:-127.0.0.1:7473}"
 
-json_or() {
-  if [ -n "$1" ]; then
-    printf '%s' "$1"
-  else
-    printf '%s' "$2"
-  fi
+HOST_PART="${ADDR%:*}"
+PORT_PART="${ADDR##*:}"
+case "$HOST_PART" in localhost|127.0.0.1|'[::1]') ;; *) printf '%s\n' '{"ok":false,"error":"invalid_daemon_address"}' >&2; exit 64 ;; esac
+case "$PORT_PART" in ''|*[!0-9]*) printf '%s\n' '{"ok":false,"error":"invalid_daemon_port"}' >&2; exit 64 ;; esac
+[ "$PORT_PART" -ge 1 ] && [ "$PORT_PART" -le 65535 ] || { printf '%s\n' '{"ok":false,"error":"invalid_daemon_port"}' >&2; exit 64; }
+
+command -v jq >/dev/null 2>&1 || { printf '%s\n' '{"ok":false,"error":"jq_not_found"}' >&2; exit 69; }
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT HUP INT TERM
+
+fetch_json() {
+  name="$1"
+  timeout="$2"
+  path="$3"
+  file="$TMP_DIR/$name.json"
+  curl --fail --silent --show-error --max-time "$timeout" --url "http://${ADDR}${path}" >"$file"
+  jq -e . "$file" >/dev/null
 }
 
-health="$(curl -fsS --max-time 2 "http://${ADDR}/health" 2>/dev/null || true)"
-if [ -z "$health" ]; then
-  printf '%s\n' '{"ok":false,"error":"daemon_unreachable"}'
-  exit 1
-fi
+fetch_json health 2 /health || { printf '%s\n' '{"ok":false,"error":"daemon_unreachable"}' >&2; exit 1; }
+fetch_json devices 4 /devices || { printf '%s\n' '{"ok":false,"error":"devices_unavailable"}' >&2; exit 1; }
+fetch_json metrics 4 /metrics || { printf '%s\n' '{"ok":false,"error":"metrics_unavailable"}' >&2; exit 1; }
+fetch_json settings 3 /settings || { printf '%s\n' '{"ok":false,"error":"settings_unavailable"}' >&2; exit 1; }
 
-devices="$(curl -fsS --max-time 4 "http://${ADDR}/devices" 2>/dev/null || true)"
-metrics="$(curl -fsS --max-time 4 "http://${ADDR}/metrics" 2>/dev/null || true)"
-settings="$(curl -fsS --max-time 3 "http://${ADDR}/settings" 2>/dev/null || true)"
-
-printf '{"ok":true,"health":%s,"devices":%s,"metrics":%s,"settings":%s}\n' \
-  "$(json_or "$health" '{"ok":true}')" \
-  "$(json_or "$devices" '{"devices":[]}')" \
-  "$(json_or "$metrics" '{}')" \
-  "$(json_or "$settings" '{}')"
+jq -cn \
+  --slurpfile health "$TMP_DIR/health.json" \
+  --slurpfile devices "$TMP_DIR/devices.json" \
+  --slurpfile metrics "$TMP_DIR/metrics.json" \
+  --slurpfile settings "$TMP_DIR/settings.json" \
+  '{ok:true,health:$health[0],devices:$devices[0],metrics:$metrics[0],settings:$settings[0]}'

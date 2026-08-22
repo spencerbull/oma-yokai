@@ -1,4 +1,4 @@
-# yokai Architecture
+# OmaYokai Architecture
 
 This directory contains multi-level architecture documentation for yokai, a TUI + distributed agent system for managing LLM services across GPU devices.
 

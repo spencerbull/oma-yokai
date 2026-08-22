@@ -1,15 +1,15 @@
-# Yokai OpenTUI Frontend
+# OmaYokai OpenTUI Frontend
 
-This package is the terminal frontend for Yokai.
+This package is the terminal frontend for OmaYokai.
 
 ## Purpose
 
-- talk only to the local Yokai daemon over REST and SSE
+- talk only to the local OmaYokai daemon over REST and SSE
 - keep backend behavior reusable for future frontends
 
 ## Current Status
 
-This is the active Yokai frontend.
+This is the active OmaYokai frontend.
 
 Implemented here:
 

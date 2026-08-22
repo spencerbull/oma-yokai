@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/spencerbull/yokai/internal/tailscale"
+	"github.com/spencerbull/oma-yokai/internal/tailscale"
 )
 
 type tailscaleSelfRecord struct {

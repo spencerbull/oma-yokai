@@ -13,7 +13,7 @@ AGENT_PORT ?= 7474
 AGENT_PATH ?= /usr/local/bin/yokai
 TUI_DIR ?= ui/tui
 
-.PHONY: build run clean uninstall test lint check agent daemon
+.PHONY: build run clean install uninstall test lint check plugin-test plugin-validate agent daemon
 .PHONY: dev dev-restart dev-daemon dev-agents dev-tui dev-legacy-tui dev-push
 .PHONY: dev-opentui tui-install tui-build tui-compile tui-dev tui-test
 
@@ -23,6 +23,11 @@ build:
 
 run: build
 	./bin/$(BINARY_NAME)
+
+install: build tui-compile
+	install -Dm755 bin/$(BINARY_NAME) "$$HOME/.local/bin/$(BINARY_NAME)"
+	install -Dm755 bin/yokai-tui "$$HOME/.local/bin/yokai-tui"
+	@echo "installed $(BINARY_NAME) and yokai-tui to $$HOME/.local/bin"
 
 agent: build
 	./bin/$(BINARY_NAME) agent
@@ -52,7 +57,14 @@ lint:
 	@test -n "$(GO)" || (echo "go is required; install Go or make sure mise is available" && exit 1)
 	$(GO) run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run
 
-check: test lint tui-test tui-build tui-compile
+check: plugin-validate plugin-test test lint tui-test tui-build tui-compile
+
+plugin-validate:
+	./scripts/validate-plugin .
+
+plugin-test:
+	@command -v bun >/dev/null 2>&1 || (echo "bun is required for plugin contract tests" && exit 1)
+	bun test tests/plugin
 
 tidy:
 	@test -n "$(GO)" || (echo "go is required; install Go or make sure mise is available" && exit 1)

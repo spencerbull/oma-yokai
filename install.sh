@@ -1,15 +1,15 @@
 #!/bin/sh
 set -e
 
-# yokai installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/spencerbull/Yokai/main/install.sh | sh
+# OmaYokai service installer
+# Usage: curl -fsSL https://raw.githubusercontent.com/spencerbull/oma-yokai/main/install.sh | sh
 
-REPO="spencerbull/Yokai"
+REPO="spencerbull/oma-yokai"
 INSTALL_DIR="/usr/local/bin"
 FALLBACK_INSTALL_DIR="$HOME/.local/bin"
 BINARY="yokai"
 TUI_BINARY="yokai-tui"
-PROJECT_NAME="Yokai"
+PROJECT_NAME="OmaYokai"
 EXISTING_YOKAI=$(command -v "$BINARY" 2>/dev/null || true)
 
 # Colors

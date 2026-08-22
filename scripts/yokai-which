@@ -3,19 +3,25 @@ set -eu
 
 PLUGIN_DIR="${1:-}"
 
-if command -v yokai >/dev/null 2>&1; then
-  command -v yokai
-  exit 0
-fi
+absolute_executable() {
+  candidate="$1"
+  [ -x "$candidate" ] || return 1
+  case "$candidate" in
+    /*) printf '%s\n' "$candidate" ;;
+    *)
+      directory="$(dirname "$candidate")"
+      filename="$(basename "$candidate")"
+      directory="$(cd "$directory" 2>/dev/null && pwd -P)" || return 1
+      printf '%s/%s\n' "$directory" "$filename"
+      ;;
+  esac
+}
 
-if [ -n "$PLUGIN_DIR" ] && [ -x "$PLUGIN_DIR/bin/yokai" ]; then
-  printf '%s\n' "$PLUGIN_DIR/bin/yokai"
-  exit 0
-fi
+PATH_CANDIDATE="$(command -v yokai 2>/dev/null || true)"
+if [ -n "$PATH_CANDIDATE" ] && absolute_executable "$PATH_CANDIDATE"; then exit 0; fi
 
-if [ -x "${HOME}/.local/bin/yokai" ]; then
-  printf '%s\n' "${HOME}/.local/bin/yokai"
-  exit 0
-fi
+if [ -n "$PLUGIN_DIR" ] && absolute_executable "$PLUGIN_DIR/bin/yokai"; then exit 0; fi
+
+if [ -n "${HOME:-}" ] && absolute_executable "${HOME}/.local/bin/yokai"; then exit 0; fi
 
 exit 1

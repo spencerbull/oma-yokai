@@ -42,7 +42,7 @@ export function DeviceEditorModal(props: DeviceEditorModalProps) {
           <strong>{props.form.mode === "create" ? "Add Device" : "Edit Device"}</strong>
         </text>
         <text fg={theme.colors.textSubtle}>Connection type: {props.form.connectionType}</text>
-        <text fg={theme.colors.textSubtle}>Leave Agent Token blank to bootstrap the remote Yokai agent automatically.</text>
+        <text fg={theme.colors.textSubtle}>Leave Agent Token blank to bootstrap the remote OmaYokai agent automatically.</text>
         <text fg={theme.colors.textSubtle}>{authMethodHint(props.form.authMethod)}</text>
 
         <Field label="Label" active={props.field === "label"}>

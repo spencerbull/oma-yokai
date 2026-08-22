@@ -83,7 +83,7 @@ export function TailscaleImportModal(props: TailscaleImportModalProps) {
         ) : null}
 
         {status && status.tag_help && props.showTagHelp ? (
-          <InstructionBlock title="Yokai Tailscale Tagging" text={status.tag_help} />
+          <InstructionBlock title="OmaYokai Tailscale Tagging" text={status.tag_help} />
         ) : null}
 
         <text fg={theme.colors.textSubtle}>Keys: Up/Down navigate · Enter import · H tag help · R refresh · Esc cancel</text>
@@ -136,7 +136,7 @@ function renderPeerMeta(peer: TailscalePeer) {
   }
   parts.push(peer.os || "unknown")
   if (peer.recommended) {
-    parts.push("recommended for Yokai", "tag:ai-gpu")
+    parts.push("recommended for OmaYokai", "tag:ai-gpu")
   }
   if (peer.other_tags && peer.other_tags.length > 0) {
     parts.push(`tags: ${peer.other_tags.join(", ")}`)

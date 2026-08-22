@@ -11,8 +11,10 @@ Column {
   property string fontFamily: Style.font.family
   property string currentSection: "overview"
   property var snapshot: yokai && yokai.snapshot ? yokai.snapshot : Fleet.emptySnapshot()
+  readonly property bool modalInteractionActive: currentSection === "deploy" && deployView.textEditing
 
   signal backRequested()
+  signal textEditingEscapeRequested()
   signal tuiRequested()
   signal refreshRequested()
 
@@ -95,12 +97,14 @@ Column {
   }
 
   Views.DeployView {
+    id: deployView
     visible: root.currentSection === "deploy"
     width: parent.width
     yokai: root.yokai
     snapshot: root.snapshot
     foreground: root.foreground
     fontFamily: root.fontFamily
+    onTextEditingEscapeRequested: root.textEditingEscapeRequested()
   }
 
   Views.SettingsView {

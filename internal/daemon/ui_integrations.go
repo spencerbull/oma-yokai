@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spencerbull/yokai/internal/claudecode"
-	"github.com/spencerbull/yokai/internal/codex"
-	"github.com/spencerbull/yokai/internal/config"
-	"github.com/spencerbull/yokai/internal/openclaw"
-	"github.com/spencerbull/yokai/internal/opencode"
-	"github.com/spencerbull/yokai/internal/vscode"
+	"github.com/spencerbull/oma-yokai/internal/claudecode"
+	"github.com/spencerbull/oma-yokai/internal/codex"
+	"github.com/spencerbull/oma-yokai/internal/config"
+	"github.com/spencerbull/oma-yokai/internal/openclaw"
+	"github.com/spencerbull/oma-yokai/internal/opencode"
+	"github.com/spencerbull/oma-yokai/internal/vscode"
 )
 
 type openAIEndpointRecord struct {
