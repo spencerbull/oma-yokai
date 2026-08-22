@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+METHOD="${1:?method is required}"
+PATH_ARG="${2:?path is required}"
+ADDR="${3:-127.0.0.1:7473}"
+BODY="${4:-}"
+
+URL="http://${ADDR}${PATH_ARG}"
+
+if [ -n "$BODY" ]; then
+  curl -fsS --max-time 30 -X "$METHOD" -H "Content-Type: application/json" --data "$BODY" "$URL"
+else
+  curl -fsS --max-time 30 -X "$METHOD" "$URL"
+fi

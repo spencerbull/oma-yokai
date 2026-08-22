@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+
+ADDR="${1:-127.0.0.1:7473}"
+
+json_or() {
+  if [ -n "$1" ]; then
+    printf '%s' "$1"
+  else
+    printf '%s' "$2"
+  fi
+}
+
+health="$(curl -fsS --max-time 2 "http://${ADDR}/health" 2>/dev/null || true)"
+if [ -z "$health" ]; then
+  printf '%s\n' '{"ok":false,"error":"daemon_unreachable"}'
+  exit 1
+fi
+
+devices="$(curl -fsS --max-time 4 "http://${ADDR}/devices" 2>/dev/null || true)"
+metrics="$(curl -fsS --max-time 4 "http://${ADDR}/metrics" 2>/dev/null || true)"
+settings="$(curl -fsS --max-time 3 "http://${ADDR}/settings" 2>/dev/null || true)"
+
+printf '{"ok":true,"health":%s,"devices":%s,"metrics":%s,"settings":%s}\n' \
+  "$(json_or "$health" '{"ok":true}')" \
+  "$(json_or "$devices" '{"devices":[]}')" \
+  "$(json_or "$metrics" '{}')" \
+  "$(json_or "$settings" '{}')"

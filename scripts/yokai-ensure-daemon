@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+BINARY="${1:?yokai binary is required}"
+ADDR="${2:-127.0.0.1:7473}"
+STATE_HOME="${XDG_STATE_HOME:-${HOME}/.local/state}"
+LOG_DIR="${STATE_HOME}/yokai"
+LOG="${LOG_DIR}/daemon.log"
+
+mkdir -p "$LOG_DIR"
+
+if curl -fsS --max-time 1 "http://${ADDR}/health" >/dev/null 2>&1; then
+  printf '%s\n' '{"started":false,"healthy":true}'
+  exit 0
+fi
+
+nohup "$BINARY" daemon >>"$LOG" 2>&1 &
+PID=$!
+printf '%s\n' "{\"started\":true,\"pid\":${PID},\"log\":\"${LOG}\"}"

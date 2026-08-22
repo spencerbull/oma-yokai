@@ -1,0 +1,79 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - bun install --cwd ui/tui --frozen-lockfile --os='*' --cpu='*'
+
+builds:
+  - id: yokai
+    main: ./cmd/yokai
+    binary: yokai
+    env:
+      - CGO_ENABLED=0 # Static binary for easier distribution
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # Bun cannot currently build the TUI sidecar for Windows ARM64.
+      # Do not publish a partial archive that would leave users with a
+      # stale or missing UI after installation.
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      # Strip debug info and inject version/build time
+      - -s -w -X main.version={{.Version}} -X main.buildTime={{.Date}}
+
+  - id: yokai-tui
+    builder: bun
+    binary: yokai-tui
+    dir: ui/tui
+    main: src/index.tsx
+    targets:
+      - linux-x64-modern
+      - linux-arm64
+      - darwin-x64
+      - darwin-arm64
+      - windows-x64-modern
+    flags:
+      - --compile
+      - --format=esm
+      - --minify
+      - --bytecode
+
+archives:
+  - formats:
+      - tar.gz
+    ids:
+      - yokai
+      - yokai-tui
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  # Version template for development builds
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - 'merge conflict'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch

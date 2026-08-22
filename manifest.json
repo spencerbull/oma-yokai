@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.spencerbull.oma-yokai",
+  "name": "OmaYokai",
+  "version": "0.1.0",
+  "author": "Spencer Bull",
+  "license": "MIT",
+  "description": "Glance your GPU fleet from the Omarchy bar, then dive into Yokai devices, deploys, and the full TUI.",
+  "homepage": "https://github.com/spencerbull/oma-yokai",
+  "kinds": ["bar-widget", "service"],
+  "keepLoaded": false,
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "Yokai",
+    "description": "Compact GPU fleet status with a simple glance and a deeper Yokai panel.",
+    "category": "AI",
+    "aliases": ["yokai", "gpu", "vllm", "llama", "fleet", "oma-yokai"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "refreshIntervalSec": 5,
+      "daemonAddr": "127.0.0.1:7473"
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Refresh interval (seconds)",
+        "min": 2,
+        "max": 120,
+        "step": 1,
+        "defaultValue": 5,
+        "description": "How often the plugin polls the local Yokai daemon."
+      },
+      {
+        "key": "daemonAddr",
+        "type": "string",
+        "label": "Daemon address",
+        "defaultValue": "127.0.0.1:7473",
+        "description": "Host:port of the local Yokai daemon. Leave the default unless you changed yokai config."
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+PLUGIN_DIR="${1:-}"
+
+if command -v yokai >/dev/null 2>&1; then
+  command -v yokai
+  exit 0
+fi
+
+if [ -n "$PLUGIN_DIR" ] && [ -x "$PLUGIN_DIR/bin/yokai" ]; then
+  printf '%s\n' "$PLUGIN_DIR/bin/yokai"
+  exit 0
+fi
+
+if [ -x "${HOME}/.local/bin/yokai" ]; then
+  printf '%s\n' "${HOME}/.local/bin/yokai"
+  exit 0
+fi
+
+exit 1
