@@ -1,8 +1,8 @@
 # OmaYokai plugin completion ledger
 
-Goal: complete the bounded native OmaYokai plugin without changing inherited
-Go-service or OpenTUI behavior outside the identity and integration work needed
-for the plugin.
+Goal: create `spencerbull/oma-yokai` as a bounded native Omarchy plugin without
+changing inherited Go-service or OpenTUI behavior outside the identity and
+integration work needed for the plugin.
 
 ## Done criteria
 
@@ -16,6 +16,7 @@ for the plugin.
 - [x] Deterministic FleetModel and plugin/script contract tests cover sorting, settings redaction, native entry points, keyboard ownership, identity, snapshot failure, body handling, address bounds, and binary paths.
 - [x] Independent final diff review has no unresolved actionable findings.
 - [x] All required local gates pass; this ledger is included in the scoped branch commit.
+- [x] Public GitHub repository `spencerbull/oma-yokai` exists and is configured as `origin`.
 
 ## Worktree and branch
 
@@ -23,6 +24,7 @@ for the plugin.
 - Branch: `complete-plugin`
 - Baseline: `625f000` (inherited `main` snapshot plus incomplete plugin draft)
 - Existing work at start: clean worktree; all current changes belong to this completion stream.
+- Landed on local `main` through merge commit `Merge native OmaYokai plugin rewrite`.
 
 ## Allowed actions
 
@@ -34,7 +36,8 @@ for the plugin.
 
 - Do not edit `/usr/share/omarchy`, `~/.config/omarchy`, installed plugins, or services.
 - Do not enable/install the plugin, run privileged build hooks, use secrets, or expose credential values.
-- Do not create, push, or otherwise mutate remote repositories.
+- Worker streams do not create, push, or otherwise mutate remote repositories;
+  the orchestrator owns the user-authorized repository creation and initial push.
 - Do not change unrelated inherited Yokai behavior.
 
 ## Required gates
@@ -49,12 +52,13 @@ for the plugin.
 - Independent diff review
 
 Current evidence (2026-08-22): source-tree portable validation passes; native
-validation of a clean staged payload excluding only `.git`, `node_modules`, and
-`dist` passes. Native validation of the developer checkout itself correctly
+validation of the exact `git archive` payload passes. Native validation of the
+developer checkout itself correctly
 rejects ignored `ui/tui/node_modules/.bin` symlinks created for TUI testing; the
-validator was not weakened. Plugin tests pass 17/17, Go tests and build pass,
-TUI tests pass 26/26, bundled and standalone TUI builds pass, shell syntax checks
-pass, and `git diff --check` passes.
+validator was not weakened. The orchestrator independently reran 17/17 plugin
+tests, the complete Go suite, 26/26 TUI tests, the bundled TUI build, both plugin
+validators, and `git diff --check`; the worker also passed Go/standalone builds
+and shell syntax checks.
 
 `qmlimportscanner` resolves the current native imports without installation, but
 the installed `qmllint` reports parser errors in its own Qt/Quickshell dependency
@@ -74,19 +78,26 @@ covered by the plugin contract test instead.
 | Service/scripts | same tree | done | Encoded dynamic URLs, stdin-only JSON handoff, loopback bounds, rearmed daemon recovery, coherent process exits, safe structured errors, deterministic/fail-closed snapshot. |
 | Tests/identity/docs/CI | same tree | done | Plugin/FleetModel tests, proven BKC image preservation, tag/manual-only release publishing, OmaYokai module/release/update/docs identity, CI gates, duplicate cleanup. |
 | Review/gates/commit | same tree | done | Independent review findings are resolved; all local source/payload, Go, plugin, shell, and TUI gates pass; this ledger is included in the scoped commit. |
+| Repository | local `main` / `spencerbull/oma-yokai` | ready to push | Public repository created; ordinary `main` pushes cannot create tags or releases. |
 
 ## Workers
 
 | Name / kind | Location | State | Scope / evidence | Cleanup owner |
 | --- | --- | --- | --- | --- |
+| `plugin_contract` / Codex | pane `w1H:p3`, workspace `w1H`; read-only in Yokai | done, report returned | Established the installed/official Omarchy 4.0.0-1 native manifest, service, settings, theming, lifecycle, and process constraints. | Orchestrator after push |
+| `yokai_upstream` / Codex | pane `w1H:p4`, workspace `w1H`; read-only in Yokai | done, report returned | Confirmed current official and marketplace submission/security bounds from primary sources. | Orchestrator after push |
+| `plugin_builder` / Codex | pane `w1N:p1`, workspace `w1N`; `complete-plugin` | done, commit `c40ae8c` | Implemented the scoped plugin rewrite and returned clean post-commit validation evidence. | Orchestrator after merge/push |
 | `oma_repo_audit` / Codex | pane `w1N:p2`, tab `w1N:t1`, workspace `w1N`; this worktree/branch | done, pane closed | Final review found the unproven BKC image rename, secret-capable argv bodies, and one-shot daemon recovery. All three were fixed and covered by focused tests. | Orchestrator, complete |
 | `oma_contract_audit` / Codex | pane `w1N:p3`, tab `w1N:t1`, workspace `w1N`; this worktree/branch | done, pane closed | Confirmed Omarchy 4.0.0-1 root-v1 manifest, long-lived unsandboxed QML, native panel/key patterns, clone/validate/enable lifecycle, and missing contract tests. | Orchestrator, complete |
 
 ## Human gates and residual checks
 
 - Live shell rendering and interaction are not exercised because enabling or replacing an installed plugin is forbidden in this task.
-- A future GitHub repository/release must exist before the renamed updater and installer URLs can serve artifacts; no remote mutation is authorized here.
-- Worker panes created by this loop were closed after final review.
+- The repository exists, but no initial release was created; `install.sh` and
+  `yokai upgrade` need an explicit future release before they can download
+  OmaYokai archives.
+- Implementation audit panes were closed after final review; remaining loop-owned
+  research/builder resources are cleaned up after the push checkpoint.
 
 ## Duplicate proof
 
