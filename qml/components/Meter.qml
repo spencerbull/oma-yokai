@@ -1,13 +1,14 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 
 Item {
   id: root
   property string label: ""
   property real value: 0
   property string detail: ""
-  property color foreground: Color.foreground
-  property color fill: Color.accent
+  property color foreground: Commons.Color.foreground
+  property color fill: Commons.Color.accent
   property string fontFamily: Style.font.family
   readonly property color dim: Qt.darker(foreground, 1.55)
   readonly property real clamped: Math.max(0, Math.min(1, Number(value) / 100))

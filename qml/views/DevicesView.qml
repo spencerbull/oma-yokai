@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "../FleetModel.js" as Fleet
 import "../components" as Yokai
@@ -8,7 +9,7 @@ Column {
   id: root
   property var yokai: null
   property var snapshot: Fleet.emptySnapshot()
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
 
   readonly property color dim: Qt.darker(foreground, 1.55)

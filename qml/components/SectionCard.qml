@@ -1,18 +1,19 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 BorderSurface {
   id: root
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property int contentPadding: Style.space(12)
   default property alias content: body.children
 
   width: parent ? parent.width : implicitWidth
   implicitHeight: body.implicitHeight + contentPadding * 2
   radius: Style.cornerRadius
-  color: Style.normalFillFor(foreground, Color.accent)
-  borderSpec: Border.controlSpec("normal", foreground, Color.accent)
+  color: Style.normalFillFor(foreground, Commons.Color.accent)
+  borderSpec: Border.controlSpec("normal", foreground, Commons.Color.accent)
 
   Column {
     id: body

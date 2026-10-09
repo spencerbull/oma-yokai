@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "FleetModel.js" as Fleet
 import "views" as Views
@@ -7,7 +8,7 @@ import "views" as Views
 Column {
   id: root
   property var yokai: null
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
   property string currentSection: "overview"
   property var snapshot: yokai && yokai.snapshot ? yokai.snapshot : Fleet.emptySnapshot()
@@ -62,7 +63,7 @@ Column {
     visible: yokai && (yokai.actionError || yokai.actionStatus)
     width: parent.width
     text: yokai && yokai.actionError ? yokai.actionError : (yokai ? yokai.actionStatus : "")
-    color: yokai && yokai.actionError ? Color.urgent : root.dim
+    color: yokai && yokai.actionError ? Commons.Color.urgent : root.dim
     font.family: root.fontFamily
     font.pixelSize: Style.font.bodySmall
     wrapMode: Text.WordWrap

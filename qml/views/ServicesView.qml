@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "../FleetModel.js" as Fleet
 import "../components" as Yokai
@@ -8,7 +9,7 @@ Column {
   id: root
   property var yokai: null
   property var snapshot: Fleet.emptySnapshot()
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
 
   signal tuiRequested()
@@ -50,7 +51,7 @@ Column {
         Column {
           width: Math.max(80, parent.width - serviceActions.implicitWidth - parent.spacing)
           spacing: Style.space(3)
-          Text { width: parent.width; text: Fleet.serviceGlyph(modelData) + " " + modelData.name; color: Fleet.isAlertService(modelData) ? Color.urgent : Fleet.serviceState(modelData) === "running" ? root.foreground : root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true; elide: Text.ElideRight }
+          Text { width: parent.width; text: Fleet.serviceGlyph(modelData) + " " + modelData.name; color: Fleet.isAlertService(modelData) ? Commons.Color.urgent : Fleet.serviceState(modelData) === "running" ? root.foreground : root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true; elide: Text.ElideRight }
           Text { width: parent.width; text: modelData.deviceLabel + " · " + modelData.type + " · " + Fleet.serviceDisplayState(modelData); color: root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; elide: Text.ElideRight }
           Text { width: parent.width; visible: modelData.generationTokPerSec > 0 || modelData.gpuMemoryMB > 0; text: Math.round(modelData.generationTokPerSec) + " tok/s · " + Fleet.formatMemory(modelData.gpuMemoryMB) + " GPU memory"; color: root.dim; font.family: root.fontFamily; font.pixelSize: Style.font.caption; elide: Text.ElideRight }
         }

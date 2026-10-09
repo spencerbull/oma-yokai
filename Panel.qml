@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "qml" as YokaiViews
 
@@ -15,7 +16,7 @@ Panel {
   property bool deepMode: false
 
   readonly property var barIdentity: hostWidget || root
-  readonly property color contentForeground: bar ? bar.foreground : Color.foreground
+  readonly property color contentForeground: bar ? bar.foreground : Commons.Color.foreground
   readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
 
   function open() {
@@ -27,13 +28,20 @@ Panel {
   function openFromHotkey() {
     open()
     Qt.callLater(function() {
-      if (root.opened && root.bar && "centerHoverRevealSuppressed" in root.bar)
-        root.bar.centerHoverRevealSuppressed = true
+      if (root.opened) root.setCenterHoverRevealSuppressed(true)
     })
   }
 
+  function setCenterHoverRevealSuppressed(value) {
+    if (!bar) return
+    if (typeof bar.setCenterHoverRevealSuppressed === "function")
+      bar.setCenterHoverRevealSuppressed(value)
+    else if ("centerHoverRevealSuppressed" in bar)
+      bar.centerHoverRevealSuppressed = value
+  }
+
   function close() {
-    if (bar && "centerHoverRevealSuppressed" in bar) bar.centerHoverRevealSuppressed = false
+    setCenterHoverRevealSuppressed(false)
     controller.hide()
   }
 
