@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "../FleetModel.js" as Fleet
 import "../components" as Yokai
@@ -8,7 +9,7 @@ Column {
   id: root
   property var yokai: null
   property var snapshot: Fleet.emptySnapshot()
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
   property string selectedDeviceId: ""
   property string workload: "vllm"
@@ -143,7 +144,7 @@ Column {
       }
     }
 
-    Text { visible: root.validationError !== ""; width: parent.width; text: root.validationError; color: Color.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.WordWrap }
+    Text { visible: root.validationError !== ""; width: parent.width; text: root.validationError; color: Commons.Color.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.WordWrap }
 
     Row {
       spacing: Style.space(8)

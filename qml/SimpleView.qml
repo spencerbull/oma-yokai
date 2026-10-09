@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 import "FleetModel.js" as Fleet
 import "components" as Yokai
@@ -7,7 +8,7 @@ import "components" as Yokai
 Column {
   id: root
   property var yokai: null
-  property color foreground: Color.foreground
+  property color foreground: Commons.Color.foreground
   property string fontFamily: Style.font.family
   property var snapshot: yokai && yokai.snapshot ? yokai.snapshot : Fleet.emptySnapshot()
   property string phase: yokai ? String(yokai.phase || "checking") : "checking"
@@ -17,7 +18,7 @@ Column {
   signal refreshRequested()
 
   readonly property color dim: Qt.darker(foreground, 1.55)
-  readonly property color urgent: Color.urgent
+  readonly property color urgent: Commons.Color.urgent
   readonly property var totals: snapshot.totals || Fleet.emptyTotals()
   spacing: Style.space(12)
   width: parent ? parent.width : implicitWidth
