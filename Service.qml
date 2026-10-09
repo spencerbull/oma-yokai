@@ -15,7 +15,7 @@ Item {
 
   readonly property string pluginId: manifest && manifest.id ? String(manifest.id) : "io.github.spencerbull.oma-yokai"
   // Third-party manifests no longer carry __sourceDir; this file's own URL does.
-  readonly property string pluginDir: String(Qt.resolvedUrl(".")).replace(/^file:\/\//, "").replace(/\/$/, "")
+  readonly property string pluginDir: decodeURIComponent(String(Qt.resolvedUrl(".")).replace(/^file:\/\//, "")).replace(/\/$/, "")
   readonly property string daemonAddr: {
     var configured = settings && settings.daemonAddr ? String(settings.daemonAddr).trim() : ""
     return configured || "127.0.0.1:7473"
